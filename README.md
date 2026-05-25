@@ -1,6 +1,6 @@
 # Z++ Ultra Subset Sum Solver
 
-*One algorithm to rule them all -- world records across every subset sum category, from n=10 to n=70 with 10^15 values.*
+*One algorithm to rule them all -- world records across every subset sum category, from 10 elements to 70 elements with values up to 1 quadrillion (10 to the power of 15).*
 
 [![GitHub](https://img.shields.io/badge/GitHub-rehantheorylab--pixel/ZPP-Ultra--Subset--Sum--Solver-blue)](https://github.com/rehantheorylab-pixel/ZPP-Ultra-Subset-Sum-Solver)
 [![License](https://img.shields.io/badge/license-MIT-green)](zpp_rust/LICENSE)
@@ -11,13 +11,13 @@
 
 ## What Is This?
 
-**Z++ is a single algorithm that can solve ANY subset sum problem.** Every algorithm category, every instance type, every edge case -- Z++ holds the world record in all of them. From tiny n=10 instances to monster n=70 problems with values in the 10^15 range, Z++ finds the answer where no other solver even works.
+**Z++ is a single algorithm that can solve ANY subset sum problem.** Every algorithm category, every instance type, every edge case -- Z++ holds the world record in all of them. From tiny 10-element instances to monster 70-element problems with values reaching 1 quadrillion (10 to the power of 15), Z++ finds the answer where no other solver even works.
 
 I didn't just write one algorithm. I wrote **22 different solving strategies** that run in parallel simultaneously. Each one attacks the problem from a completely different angle. The moment any one of them finds the answer, all the others stop. This means you don't have to guess which approach will work -- you fire all of them at once and the best one wins.
 
 Some problems are best solved by splitting numbers in half and meeting in the middle. Some need SAT encoding. Some need evolutionary search. Some need brute-force DP. Some need specialized number theory. Z++ has all of these and more, and it automatically picks the right combination for whatever numbers you give it.
 
-**This is the first algorithm in history to solve subset sum for n >= 66 with massive (10^14-10^15) values.** Nobody had done this before. The test suite proves it across 65 different categories.
+**This is the first algorithm in history to solve subset sum for 66 or more elements with massive values -- 100 trillion to 1 quadrillion (10 to the power of 14 to 10 to the power of 15).** Nobody had done this before. The test suite proves it across 65 different categories.
 
 ---
 
@@ -26,16 +26,16 @@ Some problems are best solved by splitting numbers in half and meeting in the mi
 I set out to build one solver that beats every algorithm that came before it. Not just in one category -- in every category. Here's what happened:
 
 - **Edge cases**: Solved instantly (sub-millisecond). Empty sets, single elements, zeros, negatives -- all handled.
-- **Classic instances**: Matched or beat every prior solver for n=40, n=50, n=60.
-- **Hard 64-bit n=60**: 24.3 seconds. The previous approach (BCJ) would have taken ~240 hours.
-- **Hard U128 n=66**: 205 seconds. This was considered impossible before Z++.
-- **Hard U128 n=68**: 181 seconds. Another first.
-- **Hard U128 n=70**: 417 seconds. The largest subset sum ever solved.
+- **Classic instances**: Matched or beat every prior solver for 40, 50, and 60 elements.
+- **Hard 64-bit, 60 elements**: 24.3 seconds. The previous approach (BCJ) would have taken ~240 hours.
+- **Hard U128, 66 elements**: 205 seconds. This was considered impossible before Z++.
+- **Hard U128, 68 elements**: 181 seconds. Another first.
+- **Hard U128, 70 elements**: 417 seconds. The largest subset sum ever solved.
 - **SAT-encoded instances**: The jnh benchmark with 3600 variables and 1899-digit numbers solved in 0.79 seconds.
 - **Unique solution instances**: Solved within 5 seconds where others couldn't even start.
 - **65 out of 65 test categories pass**. There is no category where Z++ loses.
 
-The key innovation that made n=66-70 possible is called **sum-range partitioning**. Classic Schroeppel-Shamir algorithms compare every possible subset sum from two halves of the input, which explodes combinatorially. Instead, I split the target range [0, target] into 8 equal slices and run each on its own thread with zero shared state. No locks, no waiting, no contention. Purely independent work that happens to solve the same problem. This gives 6.6x speedup on 8 cores and makes these problem sizes feasible for the first time.
+The key innovation that made 66 to 70 elements possible is called **sum-range partitioning**. Classic Schroeppel-Shamir algorithms compare every possible subset sum from two halves of the input, which explodes combinatorially. Instead, I split the target range [0, target] into 8 equal slices and run each on its own thread with zero shared state. No locks, no waiting, no contention. Purely independent work that happens to solve the same problem. This gives 6.6x speedup on 8 cores and makes these problem sizes feasible for the first time.
 
 ---
 
@@ -46,18 +46,18 @@ The key innovation that made n=66-70 possible is called **sum-range partitioning
 | Edge cases | <0.001s | 0.1s | Empty set, single element, trivial |
 | GCD impossible | <0.001s | 0.1s | Proven unsolvable by GCD |
 | All elements | <0.001s | 0.1s | Sum of all elements matches target |
-| Super-increasing n=60 | 0.131s | 1.0s | Greedy O(n) |
+| Super-increasing, 60 elements | 0.131s | 1.0s | Greedy O(n) |
 | Duplicates | 0.073s | 1.0s | Multi-set meet-in-the-middle |
-| Small target n=1000 | 0.084s | 1.0s | Bitset DP |
-| MITM n=40 | 0.233s | 5.0s | Classic 2^(n/2) |
-| Dense n=40 | 0.443s | 5.0s | Classic MITM |
-| Sparse n=200 | 25.0s | 60.0s | Large n, small target |
+| Small target, 1000 elements | 0.084s | 1.0s | Bitset DP |
+| MITM, 40 elements | 0.233s | 5.0s | Classic 2 to the power of (n/2) |
+| Dense, 40 elements | 0.443s | 5.0s | Classic MITM |
+| Sparse, 200 elements | 25.0s | 60.0s | Large n, small target |
 | Classics | <0.05s | 1.0s | Standard benchmark instances |
 | Negative/zero | <0.001s | 1.0s | Negative values, zeros |
-| **Hard 64-bit n=60** | **24.3s** | 600s | BCJ baseline ~864000s |
-| **Hard U128 n=66** | **205s** | 650s | **First solver at this size** |
-| **Hard U128 n=68** | **181s** | 650s | **First solver at this size** |
-| **Hard U128 n=70** | **417s** | 650s | **First solver at this size** |
+| **Hard 64-bit, 60 elements** | **24.3s** | 600s | BCJ baseline ~864000s |
+| **Hard U128, 66 elements** | **205s** | 650s | **First solver at this size** |
+| **Hard U128, 68 elements** | **181s** | 650s | **First solver at this size** |
+| **Hard U128, 70 elements** | **417s** | 650s | **First solver at this size** |
 | Unique solution | <5s | 600s | Single-solution instances |
 | **SAT-encoded (jnh)** | **0.79s** | 600s | 3600 elements, 1899-digit numbers |
 | Big numbers | <0.001s | 0.1s | Arbitrary-precision values |
@@ -80,7 +80,7 @@ Z++ handles this with a three-step process:
 
 ### The Hidden Genius: Sum-Range Partitioning
 
-This is what unlocks n=66-70. Normal Schroeppel-Shamir generates all possible subset sums from two halves and compares them. That's O(2^(n/2)) -- way too many for big instances.
+This is what unlocks 66 to 70 elements. Normal Schroeppel-Shamir generates all possible subset sums from two halves and compares them. That's O(2 to the power of (n/2)) -- way too many for big instances.
 
 Instead, Z++ splits the target range into 8 equal slices. Each of 8 threads independently walks one slice searching for a matching pair. Zero shared state. Zero coordination. Zero contention. Just 8 threads doing their own thing, each exploring a different part of the number line, and one of them finds the answer.
 
@@ -201,9 +201,9 @@ Result  --- Exact solution or IMPOSSIBLE proof
 | Engine | Strategy |
 |--------|----------|
 | **Schroeppel-Shamir** | Parallel sum-range partitioned heap walk (8 threads) |
-| **Hard-U128** | 128-bit parallel SS for n>=44 |
+| **Hard-U128** | 128-bit parallel SS for 44 elements or more |
 | **BCJ** | Signed representation filter (base-3, multi-round) |
-| **Meet-in-the-Middle** | Classic 2^(n/2) split |
+| **Meet-in-the-Middle** | Classic 2 to the power of (n/2) split |
 | **ColumnSAT** | SAT-to-subset-sum via DPLL |
 | **Beam Search** | Bounded-width heuristic search |
 | **PMAS** | Parallel memetic adaptive search |
@@ -234,7 +234,7 @@ n=60:   24s     (Hard-U128 parallel SS)
 n=66:  205s     [WR] First solver at this size
 n=68:  181s     [WR]
 n=70:  417s     [WR]
-n=72:  timeout  (open problem -- 2^18 enumeration per quarter -> 68B AB pairs)
+n=72:  timeout  (open problem -- 2 to the power of 18 enumeration per quarter -> 68 billion AB pairs)
 ```
 
 Memory usage stays under 12GB for all tested instances.
@@ -285,13 +285,13 @@ Given a set of integers, does any subset sum to exactly a target value? Despite 
 <details>
 <summary>What makes Z++ different from other subset sum solvers?</summary>
 
-Three things. First, Z++ is the only solver that works for n >= 66 with values in the 10^14-10^15 range. Second, it doesn't rely on one algorithm -- it runs 22 different engines simultaneously, so the best one for your specific problem wins automatically. Third, the sum-range partitioning technique (splitting the target range across threads with zero shared state) is a genuinely new approach that achieves near-linear scaling on multi-core systems.
+Three things. First, Z++ is the only solver that works for 66 elements or more with values in the 100 trillion to 1 quadrillion range (10 to the power of 14 to 10 to the power of 15). Second, it doesn't rely on one algorithm -- it runs 22 different engines simultaneously, so the best one for your specific problem wins automatically. Third, the sum-range partitioning technique (splitting the target range across threads with zero shared state) is a genuinely new approach that achieves near-linear scaling on multi-core systems.
 </details>
 
 <details>
 <summary>Is Z++ the fastest subset sum solver in the world?</summary>
 
-For n >= 66 with large (128-bit) values, yes -- Z++ is the first and only solver to succeed at all. For smaller instances (n <= 40), it matches or beats every existing solver. The 65-category test suite confirms world-record performance across every known category. There is no scenario where another solver beats Z++.
+For 66 elements or more with large (128-bit) values, yes -- Z++ is the first and only solver to succeed at all. For smaller instances (40 elements or fewer), it matches or beats every existing solver. The 65-category test suite confirms world-record performance across every known category. There is no scenario where another solver beats Z++.
 </details>
 
 <details>
@@ -309,7 +309,7 @@ The jnh benchmark is a famous SAT problem with 3600 variables and numbers up to 
 <details>
 <summary>What are the limitations?</summary>
 
-n >= 72 is still unsolved. At n=72, the enumeration produces 2^18 subsets per quarter, and the AB-pair comparison grows to roughly 68 billion pairs -- too many for the current 600-second timeout. BCJ at this size needs 3^18 (387 million) signed representations, taking roughly 28 minutes. Someone will need a fundamentally new insight to push past n=72. Z++ also needs up to 12GB RAM, which limits hash-based methods for n > 60.
+72 elements or more is still unsolved. At that size, the enumeration produces 2 to the power of 18 subsets per quarter, and the AB-pair comparison grows to roughly 68 billion pairs -- too many for the current 600-second timeout. BCJ at this size needs 3 to the power of 18 (387 million) signed representations, taking roughly 28 minutes. Someone will need a fundamentally new insight to push past this barrier. Z++ also needs up to 12GB RAM, which limits hash-based methods for more than 60 elements.
 </details>
 
 <details>
@@ -334,13 +334,13 @@ Absolutely. MIT license -- take it, use it, modify it, sell products with it. Ju
 <details>
 <summary>What hardware do I need?</summary>
 
-Any modern x86-64 or ARM64 system. 8GB RAM minimum, 12GB recommended for n >= 60. More cores = faster (the parallel Schroeppel-Shamir scales with core count). Works on Windows, Linux, and macOS.
+Any modern x86-64 or ARM64 system. 8GB RAM minimum, 12GB recommended for 60 elements or more. More cores = faster (the parallel Schroeppel-Shamir scales with core count). Works on Windows, Linux, and macOS.
 </details>
 
 <details>
 <summary>How long does the test suite take?</summary>
 
-All 65 world-record verification tests complete in under 10 minutes on a standard desktop (tested on 8-core i7 with 12GB RAM). The big ones (n=66, n=68, n=70) take 3-7 minutes combined.
+All 65 world-record verification tests complete in under 10 minutes on a standard desktop (tested on 8-core i7 with 12GB RAM). The big ones (66 elements, 68 elements, 70 elements) take 3-7 minutes combined.
 </details>
 
 <details>
