@@ -1,0 +1,22 @@
+# Rust build artifacts
+zpp_rust/target/
+zpp_rust/**/*.exe
+zpp_rust/**/*.pdb
+zpp_rust/**/*.d
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test artifacts
+*.txt
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Keep only essential test scripts
+# (all _wr_*.py, _test_*.py etc. stay as they're part of the benchmark suite)
