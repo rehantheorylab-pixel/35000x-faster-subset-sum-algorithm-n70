@@ -56,7 +56,7 @@ Full technical details in `zpp_rust/src/knapsack.rs` and `zpp_rust/src/engines/g
 | Hard U128, 70 elements | **417s** | 650s | **World Record** |
 | SAT-encoded (jnh) | **0.79s** | 600s | 3600 vars, 1899-digit numbers |
 
-The test suite (`test_zpp.py`) verifies all 65 categories in under 10 minutes.
+The test suite (`tests/tests/test_zpp.py`) verifies all 65 categories in under 10 minutes.
 
 ---
 
@@ -85,7 +85,7 @@ zpp.exe
 ```powershell
 git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git
 cd 35000x-faster-subset-sum-algorithm-n70
-.\install_command.ps1
+.\scripts\install_command.ps1
 ```
 > Pre-built EXE is 5-15% slower than native build.
 
@@ -100,8 +100,8 @@ Requires Rust 1.85+.
 ```bash
 git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git
 cd 35000x-faster-subset-sum-algorithm-n70
-.\install.ps1    # Windows
-./install.sh     # Linux/macOS
+.\scripts/install.ps1    # Windows
+./scripts/install.sh     # Linux/macOS
 algorithm
 ```
 Requirements: 8GB RAM (12GB for n=60+). Python 3.11+ for test suite only.
@@ -114,7 +114,7 @@ Target: 200
 
 Output: `EXACT: True  Engine: Hard-U128  Time: 0.0234s  Solution: [23, 45, 67, 65]`
 
-Run tests: `python test_zpp.py` (under 10 min)
+Run tests: `python tests/tests/tests/test_zpp.py` (under 10 min)
 
 Python API: `from Z_plus_plus_gui import solve`
 
@@ -222,7 +222,7 @@ Repository: `github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-
 <details>
 <summary>How is the 35,000x claim verified?</summary>
 
-Independent test suite (`test_zpp.py`) verifies all claims in under 10 minutes. At n=60 hard 64-bit: 24.3s vs BCJ baseline ~864,000s (240 hours). Ratio: 35,556x. Anyone can reproduce this.
+Independent test suite (`tests/tests/test_zpp.py`) verifies all claims in under 10 minutes. At n=60 hard 64-bit: 24.3s vs BCJ baseline ~864,000s (240 hours). Ratio: 35,556x. Anyone can reproduce this.
 
 </details>
 
@@ -279,5 +279,7 @@ Original contributions:
 ---
 
 *Built by Rehan -- the world record subset sum solver.*
+
+
 
 
