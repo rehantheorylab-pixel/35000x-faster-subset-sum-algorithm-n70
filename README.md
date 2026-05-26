@@ -1,4 +1,4 @@
-# Subset Sum Solver -- Fastest Exact Algorithm (World Record, Breakthrough Discovery)
+﻿# Subset Sum Solver -- Fastest Exact Algorithm (World Record, Breakthrough Discovery)
 
 **The world record fastest exact subset sum solver and subset sum algorithm. A breakthrough discovery solving the NP-complete subset sum problem at unprecedented scale -- up to 70 elements with values reaching 1 quadrillion. Open source, standalone binary available.**
 
@@ -253,3 +253,4 @@ Original contributions:
 ---
 
 *Built by Rehan -- the world record subset sum solver.*
+
