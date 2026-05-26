@@ -1,4 +1,4 @@
-pub mod apde;
+﻿pub mod apde;
 pub mod backward;
 pub mod bcj;
 pub mod bonnetain;
@@ -11,6 +11,7 @@ pub mod decompose;
 pub mod dominance;
 pub mod dual_collapse;
 pub mod estimate;
+pub mod gdep;
 pub mod greedy;
 pub mod hgj;
 pub mod ksum;
@@ -24,6 +25,7 @@ use crate::controller::Engine;
 
 pub fn build(name: &'static str) -> Option<Box<dyn Engine>> {
     match name {
+        "GDEP" => Some(Box::new(gdep::GdepEngine)),
         "BitsetDP" => Some(Box::new(bitset_dp::BitsetDpEngine)),
         "MITM" => Some(Box::new(mitm::MitmEngine)),
         "Greedy" => Some(Box::new(greedy::GreedyEngine)),
