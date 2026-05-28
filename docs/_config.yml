@@ -1,3 +1,5 @@
-﻿theme: null
-plugins: []
-exclude: []
+﻿title: Z++ Ultra Subset Sum Solver
+description: World record fastest exact subset sum solver
+baseurl: "/35000x-faster-subset-sum-algorithm-n70"
+url: "https://rehantheorylab-pixel.github.io"
+markdown: kramdown
