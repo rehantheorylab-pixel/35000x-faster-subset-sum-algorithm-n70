@@ -6,15 +6,30 @@ use crate::controller::{Engine, Shared};
 pub struct DigitFilterEngine;
 
 impl DigitFilterEngine {
-    fn last_digit_reachable(nums: &[BigUint], target_ld: u32) -> bool {
-        let mut reach: u16 = 1;
+    pub fn last_2_digits_reachable(nums: &[BigUint], target: &BigUint, current: &BigUint) -> bool {
+        let remaining = if current.is_zero() {
+            target.clone()
+        } else {
+            if current >= target { return false; }
+            target - current
+        };
+        if remaining.is_zero() { return true; }
+        let target_idx = (&remaining % 100u32).to_u32().unwrap_or(0) as usize;
+        let mut reachable = [false; 100];
+        reachable[0] = true;
         for x in nums {
-            let r = (x % 10u32).to_u32().unwrap_or(0) as u16;
-            let shifted = (reach as u32) << r;
-            let wrapped = ((shifted | (shifted >> 10)) & 0x3FF) as u16;
-            reach = reach | wrapped;
+            let r = (x % 100u32).to_u32().unwrap_or(0) as usize;
+            let mut next = [false; 100];
+            for i in 0..100 {
+                if reachable[i] {
+                    next[(i + r) % 100] = true;
+                    next[i] = true;
+                }
+            }
+            reachable = next;
+            if reachable[target_idx] { return true; }
         }
-        (reach >> target_ld) & 1 == 1
+        false
     }
 
     fn magnitude(n: &BigUint) -> u32 {
@@ -28,36 +43,36 @@ impl DigitFilterEngine {
         s.chars().next().unwrap_or('0').to_digit(10).unwrap_or(0)
     }
 
-    fn first_digit_feasible(nums: &[BigUint], target: &BigUint) -> bool {
-        if nums.is_empty() { return target.is_zero(); }
-        let t_fd = Self::first_digit(target);
-        let t_mag = Self::magnitude(target);
-        let mut min_sum = BigUint::zero();
-        let mut max_sum = BigUint::zero();
+    fn first_digit_feasible(nums: &[BigUint], target: &BigUint, current: &BigUint) -> bool {
+        if nums.is_empty() { return *target == *current; }
+        let remaining = if current.is_zero() {
+            target.clone()
+        } else {
+            if current >= target { return false; }
+            target - current
+        };
+        if remaining.is_zero() { return true; }
+        let t_fd = Self::first_digit(&remaining);
+        let t_mag = Self::magnitude(&remaining);
+        let mut min_possible = BigUint::zero();
+        let mut max_possible = BigUint::zero();
         for x in nums {
-            if x <= target {
-                min_sum = Self::min_if_summed(&min_sum, x, target);
-            }
-            max_sum += x;
+            if *x <= remaining { min_possible = x.clone(); }
+            max_possible = &max_possible + x;
         }
-        let max_fd = Self::first_digit(&max_sum);
-        let max_mag = Self::magnitude(&max_sum);
-        if max_mag < t_mag || (max_mag == t_mag && max_fd < t_fd) {
-            return false;
-        }
-        if !min_sum.is_zero() {
-            let min_fd = Self::first_digit(&min_sum);
-            let min_mag = Self::magnitude(&min_sum);
+        if !min_possible.is_zero() {
+            let min_fd = Self::first_digit(&min_possible);
+            let min_mag = Self::magnitude(&min_possible);
             if min_mag > t_mag || (min_mag == t_mag && min_fd > t_fd) {
                 return false;
             }
         }
+        let max_fd = Self::first_digit(&max_possible);
+        let max_mag = Self::magnitude(&max_possible);
+        if max_mag < t_mag || (max_mag == t_mag && max_fd < t_fd) {
+            return false;
+        }
         true
-    }
-
-    fn min_if_summed(a: &BigUint, b: &BigUint, target: &BigUint) -> BigUint {
-        let s = a + b;
-        if s > *target { BigUint::zero() } else { s }
     }
 }
 
@@ -68,14 +83,15 @@ impl Engine for DigitFilterEngine {
         let p = &sh.profile;
         if p.n == 0 || p.target.is_zero() { return; }
 
-        let target_ld = (&p.target % 10u32).to_u32().unwrap_or(0);
-        if !Self::last_digit_reachable(&p.numbers, target_ld) {
+        let zero = BigUint::zero();
+
+        if !Self::last_2_digits_reachable(&p.numbers, &p.target, &zero) {
             sh.proved_impossible.store(true, Ordering::Release);
             sh.stop.store(true, Ordering::Release);
             return;
         }
 
-        if !Self::first_digit_feasible(&p.numbers, &p.target) {
+        if !Self::first_digit_feasible(&p.numbers, &p.target, &zero) {
             sh.proved_impossible.store(true, Ordering::Release);
             sh.stop.store(true, Ordering::Release);
         }

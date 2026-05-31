@@ -1,39 +1,9 @@
 ﻿use num_bigint::BigUint;
-use num_traits::{ToPrimitive, Zero};
+use num_traits::Zero;
 use crate::controller::{Engine, Shared};
+use crate::engines::digit_filter::DigitFilterEngine;
 
 pub struct GdepEngine;
-
-impl GdepEngine {
-    fn last_digit_reachable(nums: &[BigUint], target: &BigUint, current_sum: &BigUint) -> bool {
-        let total_needed = if current_sum.is_zero() {
-            target.clone()
-        } else {
-            target - current_sum
-        };
-        if total_needed.is_zero() { return true; }
-        let target_ld = (&total_needed % 10u32).to_u32().unwrap_or(0);
-        let mut reach: u16 = 1;
-        for x in nums {
-            let r = (x % 10u32).to_u32().unwrap_or(0) as u16;
-            let shifted = (reach as u32) << r;
-            let wrapped = ((shifted | (shifted >> 10)) & 0x3FF) as u16;
-            reach = reach | wrapped;
-        }
-        (reach >> target_ld) & 1 == 1
-    }
-
-    fn magnitude(n: &BigUint) -> u32 {
-        if n.is_zero() { return 0; }
-        n.to_str_radix(10).len() as u32 - 1
-    }
-
-    fn first_digit(n: &BigUint) -> u32 {
-        if n.is_zero() { return 0; }
-        let s = n.to_str_radix(10);
-        s.chars().next().unwrap_or('0').to_digit(10).unwrap_or(0)
-    }
-}
 
 impl Engine for GdepEngine {
     fn name(&self) -> &'static str { "GDEP" }
@@ -47,11 +17,18 @@ impl Engine for GdepEngine {
             return;
         }
 
-        let mut desc: Vec<BigUint> = nums.to_vec();
-        desc.sort_by(|a, b| b.cmp(a));
+        // Sort by proximity to target: elements closest to target first
+        // This finds sparse solutions (few elements) much faster
+        let mut ordered: Vec<BigUint> = nums.to_vec();
+        ordered.sort_by(|a, b| {
+            let da = if a > target { BigUint::from(u64::MAX) } else { target - a };
+            let db = if b > target { BigUint::from(u64::MAX) } else { target - b };
+            da.cmp(&db)
+        });
+
         let mut suf: Vec<BigUint> = vec![BigUint::zero(); n + 1];
         for i in (0..n).rev() {
-            suf[i] = &suf[i + 1] + &desc[i];
+            suf[i] = &suf[i + 1] + &ordered[i];
         }
         let mut path: Vec<BigUint> = Vec::new();
 
@@ -69,8 +46,9 @@ impl Engine for GdepEngine {
             if sh.stopped() || start >= n { return false; }
 
             let remaining = target;
+            let zero = BigUint::zero();
 
-            if !GdepEngine::last_digit_reachable(&nums[start..], remaining, current_sum) {
+            if !DigitFilterEngine::last_2_digits_reachable(&nums[start..], remaining, &zero) {
                 return false;
             }
 
@@ -78,10 +56,6 @@ impl Engine for GdepEngine {
                 let v = &nums[i];
                 if v > remaining { continue; }
                 if suf[i] < *remaining { return false; }
-
-                let t_mag = GdepEngine::magnitude(remaining);
-                let v_mag = GdepEngine::magnitude(v);
-                if v_mag > t_mag + 1 { continue; }
 
                 if v == remaining {
                     path.push(v.clone());
@@ -102,7 +76,7 @@ impl Engine for GdepEngine {
         }
 
         let zero = BigUint::zero();
-        if dfs(&desc, &suf, target, 0, n, &mut path, &zero, sh) {
+        if dfs(&ordered, &suf, target, 0, n, &mut path, &zero, sh) {
             sh.report(path, "GDEP");
         }
     }
