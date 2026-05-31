@@ -1498,10 +1498,10 @@ class RustSubprocessEngine:
     def __init__(self, ctrl):
         self.ctrl = ctrl
         self.name = "RustZpp"
-        _script_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else r"C:\Users\rehan\algorithm"
+        _script_dir = os.path.dirname(os.path.abspath(__file__))
         candidates = [
-            r"C:\Users\rehan\algorithm\zpp_rust\target\release\zpp.exe",
             os.path.join(_script_dir, "zpp_rust", "target", "release", "zpp.exe"),
+            os.path.join(_script_dir, "zpp.exe"),
         ]
         self.exe_path = None
         for c in candidates:
@@ -1784,9 +1784,8 @@ class ZUltimateController:
         # Always have scored fallback
         engines.append(ScoredFallbackEngine(self))
 
-        # Rust co-processor
-        if os.path.isfile(r"C:\Users\rehan\algorithm\zpp_rust\target\release\zpp.exe"):
-            engines.append(RustSubprocessEngine(self))
+        # Rust co-processor (auto-detects binary in repo)
+        engines.append(RustSubprocessEngine(self))
 
         return engines
 

@@ -1,24 +1,27 @@
 # ============================================================
-#  Z++ Algorithm — Local PowerShell Installer
+#  Z++ Algorithm — Universal PowerShell Installer
 #
-#  This script wires up the `algorithm` command for the LOCAL copy
-#  of Z++ at C:\Users\rehan\algorithm.  For the GitHub one-liner,
-#  see zpp_rust/install.ps1 instead.
+#  This script wires up the `algorithm` command for your LOCAL
+#  copy of Z++.  Run this ONCE after cloning the repo:
 #
-#  Run this ONCE in PowerShell:
-#      cd C:\Users\rehan\algorithm
-#      .\install_command.ps1
+#      git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git
+#      cd 35000x-faster-subset-sum-algorithm-n70
+#      .\install.ps1
 #
 #  After that, type "algorithm" from any PowerShell window.
 # ============================================================
 
-$ScriptDir   = "C:\Users\rehan\algorithm"
+$ScriptDir   = Split-Path -Parent $PSScriptRoot
+if (-not $ScriptDir) { $ScriptDir = (Get-Location).Path }
+
 $PyScript    = Join-Path $ScriptDir "Z_plus_plus_gui.py"
 $RustBinary  = Join-Path $ScriptDir "zpp_rust\target\release\zpp.exe"
 $RustProject = Join-Path $ScriptDir "zpp_rust"
+$RepoExe     = Join-Path $ScriptDir "zpp.exe"
 
 if (-not (Test-Path $PyScript)) {
-    Write-Host "ERROR: $PyScript not found." -ForegroundColor Red
+    Write-Host "ERROR: Z_plus_plus_gui.py not found at $PyScript" -ForegroundColor Red
+    Write-Host "Run this script from the repo root directory." -ForegroundColor Yellow
     exit 1
 }
 
@@ -43,14 +46,18 @@ $func = @"
 
 $marker
 function algorithm {
-    `$rust_bin = "$RustBinary"
-    `$py_script = "$PyScript"
-    `$rust_proj = "$RustProject"
+    `$script_dir = Split-Path -Parent (Split-Path -Parent (Get-Command algorithm).Source)
+    `$rust_bin = Join-Path "`$script_dir" "zpp_rust\target\release\zpp.exe"
+    `$exe_bin = Join-Path "`$script_dir" "zpp.exe"
+    `$rust_proj = Join-Path "`$script_dir" "zpp_rust"
+    `$py_script = Join-Path "`$script_dir" "Z_plus_plus_gui.py"
 
-    if (Test-Path `$rust_bin) {
+    if (Test-Path `$exe_bin) {
+        & `$exe_bin @args
+    } elseif (Test-Path `$rust_bin) {
         & `$rust_bin @args
     } elseif (Test-Path `$rust_proj) {
-        Write-Host "Rust binary not found.  Building (one-time, ~1 minute)..." -ForegroundColor Yellow
+        Write-Host "Building Z++ engine (one-time, ~1 minute)..." -ForegroundColor Yellow
         Push-Location `$rust_proj
         try {
             cargo build --release
@@ -58,13 +65,13 @@ function algorithm {
                 Write-Host "Built. Launching." -ForegroundColor Green
                 & `$rust_bin @args
             } else {
-                Write-Host "Build failed.  Falling back to Python version." -ForegroundColor Yellow
-                python `$py_script @args
+                Write-Host "Build failed. Falling back to Python version." -ForegroundColor Yellow
+                python "`$py_script" @args
             }
         } finally { Pop-Location }
     } else {
-        Push-Location "$ScriptDir"
-        try { python `$py_script @args }
+        Push-Location "`$script_dir"
+        try { python "`$py_script" @args }
         finally { Pop-Location }
     }
 }
@@ -82,25 +89,18 @@ if ((Get-ExecutionPolicy -Scope CurrentUser) -in @('Restricted','Undefined')) {
 }
 
 Write-Host ""
-if (Test-Path $RustBinary) {
-    Write-Host "Rust binary found: $RustBinary" -ForegroundColor Green
-    Write-Host "The 'algorithm' command will use the Rust version." -ForegroundColor Green
+if (Test-Path $RepoExe) {
+    Write-Host "Pre-built binary found: algorithm will use zpp.exe (no Rust needed)." -ForegroundColor Green
+} elseif (Test-Path $RustBinary) {
+    Write-Host "Built binary found at: $RustBinary" -ForegroundColor Green
 } else {
-    Write-Host "Rust binary NOT YET BUILT." -ForegroundColor Yellow
-    Write-Host "On first 'algorithm' run, it will auto-build (1-minute one-time)." -ForegroundColor Yellow
+    Write-Host "Binary NOT YET BUILT." -ForegroundColor Yellow
+    Write-Host "On first 'algorithm' run, it will auto-build (~1 minute)." -ForegroundColor Yellow
+    Write-Host "Or download pre-built zpp.exe from GitHub Releases." -ForegroundColor Gray
 }
 
 Write-Host ""
-Write-Host "DONE.  Reload your profile in this window with:" -ForegroundColor Green
+Write-Host "DONE. Reload your profile in this window with:" -ForegroundColor Green
 Write-Host "    . `$PROFILE" -ForegroundColor Yellow
-Write-Host "Or close + open a new PowerShell window, then type:  algorithm" -ForegroundColor White
-Write-Host ""
-Write-Host "----- To publish on GitHub later -----" -ForegroundColor Cyan
-Write-Host "    cd $RustProject" -ForegroundColor Gray
-Write-Host "    git init && git add . && git commit -m ""Initial release""" -ForegroundColor Gray
-Write-Host "    git branch -M main" -ForegroundColor Gray
-Write-Host "    git remote add origin https://github.com/<YOUR_USERNAME>/zpp.git" -ForegroundColor Gray
-Write-Host "    git push -u origin main" -ForegroundColor Gray
-Write-Host ""
-Write-Host "Then update REPLACE_USERNAME inside install.ps1 / install.sh." -ForegroundColor Gray
+Write-Host "Or open a NEW PowerShell window, then type:  algorithm" -ForegroundColor White
 Write-Host ""

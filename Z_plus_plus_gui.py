@@ -67,7 +67,7 @@ class ProblemProfile:
             self.spread = self.median = 0
 
         try:
-        if self.n > 1:
+            if self.n > 1:
                 self.variance = sum((x - self.mean) ** 2
                                     for x in self.numbers) / (self.n - 1)
                 self.std_dev = math.sqrt(self.variance)
@@ -76,7 +76,7 @@ class ProblemProfile:
                                          for x in self.numbers) / self.n)
                     self.kurtosis = (sum(((x - self.mean) / self.std_dev) ** 4
                                          for x in self.numbers) / self.n - 3)
-        else:
+                else:
                     self.skewness = self.kurtosis = 0.0
                 self.is_uneven = (self.spread > self.mean * 3
                                   or self.std_dev > self.mean)

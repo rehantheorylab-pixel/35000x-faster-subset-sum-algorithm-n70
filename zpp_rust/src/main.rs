@@ -84,10 +84,11 @@ fn run_file() {
     stdin.lock().read_line(&mut path_line).ok();
     let path = path_line.trim().trim_matches('"');
 
-    let default = r"C:\Users\rehan\algorithm\jnh1.cnf\z_test_elements.txt";
-    let path = if path.is_empty() { default } else { path };
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let default = format!("{}/../jnh1.cnf/z_test_elements.txt", manifest_dir);
+    let path = if path.is_empty() { default } else { path.to_string() };
 
-    if !Path::new(path).exists() {
+    if !Path::new(&path).exists() {
         println!("  File not found: {}", path);
         return;
     }
@@ -243,15 +244,19 @@ fn solve_and_report(numbers: Vec<BigUint>, target: BigUint) {
                 let timeout = if red_profile.looks_sat_encoded() {
                     Duration::from_secs(600)
                 } else if red_profile.u128_safe() && red_profile.n >= 44 {
-                    if red_profile.n > 68 {
-                        Duration::from_secs(14400)
+                    if red_profile.n > 100 {
+                        Duration::from_secs(600)
+                    } else if red_profile.n > 80 {
+                        Duration::from_secs(600)
+                    } else if red_profile.n > 68 {
+                        Duration::from_secs(600)
                     } else if red_profile.n > 64 {
                         Duration::from_secs(7200)
                     } else {
                         Duration::from_secs(600)
                     }
                 } else if red_profile.n > 60 {
-                    Duration::from_secs(3600)
+                    Duration::from_secs(600)
                 } else {
                     Duration::from_secs(300)
                 };
@@ -262,13 +267,8 @@ fn solve_and_report(numbers: Vec<BigUint>, target: BigUint) {
                     let sat_only: Vec<Box<dyn Engine>> =
                         vec![engines::build("ColumnSAT").unwrap()];
                     race(red_profile.clone(), sat_only, timeout)
-                } else if red_profile.u128_safe() && red_profile.n >= 44 && red_profile.n <= 80
+                } else if red_profile.u128_safe() && red_profile.n >= 44 && red_profile.n <= 140
                 {
-                    // Full portfolio: Hard-U128 pack + all heuristics.
-                    // Unlike the 6-second carve-out before, we now give
-                    // this 180s and ALL engines — the machine has 20
-                    // logical cores and the GIL-free Rust runtime puts
-                    // every core to work.
                     let names = controller::pick_engines(&red_profile);
                     let all: Vec<Box<dyn Engine>> = names
                         .iter()

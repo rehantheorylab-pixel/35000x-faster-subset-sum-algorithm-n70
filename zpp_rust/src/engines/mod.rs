@@ -8,6 +8,7 @@ pub mod bitset_dp;
 pub mod bridge;
 pub mod column_sat;
 pub mod decompose;
+pub mod digit_filter;
 pub mod dominance;
 pub mod dual_collapse;
 pub mod estimate;
@@ -50,6 +51,7 @@ pub fn build(name: &'static str) -> Option<Box<dyn Engine>> {
         "BCJ" => Some(Box::new(bcj::BcjEngine)),
         "Bonnetain" => Some(Box::new(bonnetain::BonnetainEngine)),
         "Hard-U128" => Some(Box::new(hard_u128::HardU128Engine)),
+        "DigitFilter" => Some(Box::new(digit_filter::DigitFilterEngine)),
         _ => None,
     }
 }

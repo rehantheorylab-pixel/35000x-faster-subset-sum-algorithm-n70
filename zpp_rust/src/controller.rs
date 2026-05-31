@@ -118,7 +118,7 @@ pub fn race(profile: Profile, engines: Vec<Box<dyn Engine>>, max_time: Duration)
 }
 
 pub fn pick_engines(p: &Profile) -> Vec<&'static str> {
-    let core_proof = ["Residue", "Dominance", "ColumnSAT"];
+    let core_proof = ["Residue", "DigitFilter", "Dominance", "ColumnSAT"];
     // Hard-u128 engines — fast parallel search for large random instances
     let hard_u128_pack = [
         "Hard-U128",
