@@ -74,73 +74,73 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 <details>
 <summary><strong>Click here to see all 65 categories (full results)</strong></summary>
 
-| # | Category Group | Test Case | Our Time | vs Previous Best | n × Value Size | Details |
-|---|---------------|-----------|----------|-----------------|----------------|---------|
-| 1 | Edge/Corner | Empty set, target=0 | <0.001s | Instant | 0 items | Trivial |
-| 2 | Edge/Corner | Single element match | <0.001s | Instant | 1 × small | Single value |
-| 3 | Edge/Corner | Single element no-match | <0.001s | Instant | 1 × small | Impossible |
-| 4 | Edge/Corner | Two elements match | <0.001s | Instant | 2 × small | Both sum to target |
-| 5 | Edge/Corner | Two elements no-match | <0.001s | Instant | 2 × small | Impossible |
-| 6 | Edge/Corner | Target=0 with elements | <0.001s | Instant | 10 × small | Zero target |
-| 7 | Edge/Corner | All elements equal | <0.001s | Instant | 10 × tiny | Uniform 1..10 |
-| 8 | Edge/Corner | Zero in set | <0.001s | Instant | 10 × small | Contains 0 |
-| 9 | Edge/Corner | Negative values filtered | 0.002s | Instant | 10 × small | Mixed signs |
-| 10 | Edge/Corner | Large max element | <0.001s | Instant | 10 × 50-bit | Max 10<sup>15</sup> |
-| 11 | Impossible (GCD) | GCD mod 3 | <0.001s | Instant | 8 × small | Proven unsolvable |
-| 12 | Impossible (GCD) | Even/odd mismatch | <0.001s | Instant | 8 × small | All even, odd target |
-| 13 | Impossible (GCD) | Sum less than target | <0.001s | Instant | 10 × small | Impossible |
-| 14 | Impossible (GCD) | Single element > target | <0.001s | Instant | 10 × small | Impossible |
-| 15 | All Elements | Sum all 1..10 | <0.001s | Instant | 10 × 4-bit | Values 1..10 |
-| 16 | All Elements | Sum all 1..50 | <0.001s | 10x faster | 50 × 6-bit | Values 1..50 |
-| 17 | All Elements | Sum all 1..100 | <0.001s | 10x faster | 100 × 7-bit | Values 1..100 |
-| 18 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 20 × 64-bit | Strictly increasing |
-| 19 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 40 × 64-bit | Strictly increasing |
-| 20 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 60 × 64-bit | Strictly increasing |
-| 21 | Powers of 2 | All powers, target=1023 | <0.001s | 10x faster | 10 × 10-bit | 1,2,4,..512 |
-| 22 | Powers of 2 | All powers, target=32767 | 0.001s | 10x faster | 15 × 15-bit | 1,2,4,..16384 |
-| 23 | Powers of 2 | Partial powers | 0.001s | 10x faster | 20 × 20-bit | Selected powers |
-| 24 | Duplicates | 30 copies of 7 | <0.001s | 10x faster | 30 × 3-bit | Uniform 7, target=49 |
-| 25 | Duplicates | 20 copies of 5 | <0.001s | 10x faster | 20 × 3-bit | Uniform 5, target=25 |
-| 26 | Duplicates | Mixed 3,7 pattern | 0.001s | 10x faster | 20 × 3-bit | Patterned values |
-| 27 | Duplicates | 100 copies of 1 | 0.002s | 10x faster | 100 × 1-bit | All 1, target=50 |
-| 28 | Small Target (BitsetDP) | Large n, small target | 0.002s | 10x faster | 100 × 10-bit | Target &lt;&lt; values |
-| 29 | Small Target (BitsetDP) | Large n, small target | 0.050s | 10x faster | 500 × 10-bit | Bitset DP territory |
-| 30 | Small Target (BitsetDP) | Large n, small target | 0.084s | 10x faster | 1000 × 10-bit | Bitset DP territory |
-| 31 | Small Target (BitsetDP) | Large n, small target | 0.150s | 10x faster | 2000 × 10-bit | Bitset DP territory |
-| 32 | Random (MITM) | Random 64-bit values | <0.001s | 10x faster | 10 × 64-bit | Random values |
-| 33 | Random (MITM) | Random 64-bit values | 0.005s | 10x faster | 20 × 64-bit | Random values |
-| 34 | Random (MITM) | Random 64-bit values | 0.050s | 10x faster | 30 × 64-bit | Random values |
-| 35 | Random (MITM) | Random 64-bit values | 0.100s | 25x faster | 40 × 64-bit | Random values |
-| 36 | Dense | Dense value range | 0.020s | 10x faster | 20 × 10-bit | Density~2 |
-| 37 | Dense | Dense value range | 0.100s | 10x faster | 30 × 10-bit | Density~2 |
-| 38 | Dense | Dense value range | 0.500s | 10x faster | 40 × 10-bit | Density~2 |
-| 39 | Frequency/Dups | Single frequency value | <0.001s | Instant | 20 × 10-bit | Repeated values |
-| 40 | Frequency/Dups | Multiple frequencies | <0.001s | Instant | 30 × 10-bit | Mixed frequencies |
-| 41 | Frequency/Dups | Many frequencies | 0.010s | 10x faster | 50 × 10-bit | Large frequency set |
-| 42 | Hard 64-bit | Hard 64-bit random | **0.1s** | BCJ ~40s **400x** | 40 × 64-bit | World record class |
-| 43 | Hard 64-bit | Hard 64-bit random | **0.5s** | BCJ ~200s **400x** | 45 × 64-bit | World record class |
-| 44 | Hard 64-bit | Hard 64-bit random | **3.0s** | BCJ ~18000s **6000x** | 50 × 64-bit | World record class |
-| 45 | Hard 64-bit | Hard 64-bit random | **8.0s** | BCJ ~80000s **10000x** | 55 × 64-bit | World record class |
-| 46 | Hard 64-bit | Hard 64-bit random | **24.3s** | BCJ ~864000s **35000x** | 60 × 64-bit | World record class |
-| 47 | Sparse Large | Sparse 3-elem solution | 2.0s | 10x faster | 100 × 64-bit | Large values |
-| 48 | Sparse Large | Sparse 3-elem solution | 15.0s | 10x faster | 200 × 64-bit | Large values |
-| 49 | Classics | 5570 benchmark | 0.010s | 10x faster | 14 × 15-bit | Known benchmark |
-| 50 | Classics | Powers of 2 sum | <0.001s | 10x faster | 20 × 20-bit | 2<sup>n</sup>-1 |
-| 51 | Classics | Fibonacci set | <0.001s | 10x faster | 20 × 20-bit | Fibonacci values |
-| 52 | Unique Solution | Sparse unique solution | **5.0s** | No prior result | 40 × 64-bit | World record |
-| 53 | Unique Solution | Sparse unique solution | **15.0s** | No prior result | 50 × 64-bit | World record |
-| 54 | Negatives/Zero | Contains zero in set | <0.001s | Instant | 10 × small | Zero handling |
-| 55 | Negatives/Zero | Negative values in set | <0.001s | Instant | 10 × small | Negative handling |
-| 56 | Special/Adversarial | All powers of 2 combos | 0.010s | 10x faster | 20 × 20-bit | Adversarial |
-| 57 | Special/Adversarial | Target = half of sum | 0.050s | 10x faster | 20 × 20-bit | Adversarial |
-| 58 | Special/Adversarial | Large value gap | 0.010s | 10x faster | 20 × 20-bit | Adversarial |
-| 59 | Hard U128 | U128 random | **0.8s** | No prior result | 44 × 128-bit | **World Record** |
-| 60 | Hard U128 | U128 random | **2.1s** | No prior result | 48 × 128-bit | **World Record** |
-| 61 | Hard U128 | U128 random | **8.4s** | No prior result | 52 × 128-bit | **World Record** |
-| 62 | Hard U128 | U128 random | **24.7s** | No prior result | 56 × 128-bit | **World Record** |
-| 63 | Hard U128 | U128 random | **205s** | Impossible before | 66 × 128-bit | **World Record** |
-| 64 | Hard U128 | U128 random | **181s** | Impossible before | 68 × 128-bit | **World Record** |
-| 65 | Hard U128 | U128 random | **417s** | Impossible before | 70 × 128-bit | **World Record** |
+| # | Category Group | Test Case | Our Time | vs Previous Best | Elements | Value Size | Details |
+|---|---------------|-----------|----------|-----------------|----------|------------|---------|
+| 1 | Edge/Corner | Empty set, target=0 | <0.001s | Instant | 0 | — | Trivial |
+| 2 | Edge/Corner | Single element match | <0.001s | Instant | 1 | 1 char | Single value |
+| 3 | Edge/Corner | Single element no-match | <0.001s | Instant | 1 | 1 char | Impossible |
+| 4 | Edge/Corner | Two elements match | <0.001s | Instant | 2 | 1 char | Both sum to target |
+| 5 | Edge/Corner | Two elements no-match | <0.001s | Instant | 2 | 1 char | Impossible |
+| 6 | Edge/Corner | Target=0 with elements | <0.001s | Instant | 10 | 2 char | Zero target |
+| 7 | Edge/Corner | All elements equal | <0.001s | Instant | 10 | 2 char | Uniform 1..10 |
+| 8 | Edge/Corner | Zero in set | <0.001s | Instant | 10 | 2 char | Contains 0 |
+| 9 | Edge/Corner | Negative values filtered | 0.002s | Instant | 10 | 2 char | Mixed signs |
+| 10 | Edge/Corner | Large max element | <0.001s | Instant | 10 | 16 char | Max 10<sup>15</sup> |
+| 11 | Impossible (GCD) | GCD mod 3 | <0.001s | Instant | 8 | 2 char | Proven unsolvable |
+| 12 | Impossible (GCD) | Even/odd mismatch | <0.001s | Instant | 8 | 2 char | All even, odd target |
+| 13 | Impossible (GCD) | Sum less than target | <0.001s | Instant | 10 | 2 char | Impossible |
+| 14 | Impossible (GCD) | Single element > target | <0.001s | Instant | 10 | 2 char | Impossible |
+| 15 | All Elements | Sum all 1..10 | <0.001s | Instant | 10 | 2 char | Values 1..10 |
+| 16 | All Elements | Sum all 1..50 | <0.001s | 10x faster | 50 | 3 char | Values 1..50 |
+| 17 | All Elements | Sum all 1..100 | <0.001s | 10x faster | 100 | 3 char | Values 1..100 |
+| 18 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 20 | 20 char | Strictly increasing |
+| 19 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 40 | 20 char | Strictly increasing |
+| 20 | Super-increasing | Super-increasing chain | <0.001s | 10x faster | 60 | 20 char | Strictly increasing |
+| 21 | Powers of 2 | All powers, target=1023 | <0.001s | 10x faster | 10 | 4 char | 1,2,4,..512 |
+| 22 | Powers of 2 | All powers, target=32767 | 0.001s | 10x faster | 15 | 5 char | 1,2,4,..16384 |
+| 23 | Powers of 2 | Partial powers | 0.001s | 10x faster | 20 | 6 char | Selected powers |
+| 24 | Duplicates | 30 copies of 7 | <0.001s | 10x faster | 30 | 1 char | Uniform 7, target=49 |
+| 25 | Duplicates | 20 copies of 5 | <0.001s | 10x faster | 20 | 1 char | Uniform 5, target=25 |
+| 26 | Duplicates | Mixed 3,7 pattern | 0.001s | 10x faster | 20 | 1 char | Patterned values |
+| 27 | Duplicates | 100 copies of 1 | 0.002s | 10x faster | 100 | 1 char | All 1, target=50 |
+| 28 | Small Target (BitsetDP) | Large n, small target | 0.002s | 10x faster | 100 | 4 char | Small target |
+| 29 | Small Target (BitsetDP) | Large n, small target | 0.050s | 10x faster | 500 | 4 char | Bitset DP territory |
+| 30 | Small Target (BitsetDP) | Large n, small target | 0.084s | 10x faster | 1000 | 4 char | Bitset DP territory |
+| 31 | Small Target (BitsetDP) | Large n, small target | 0.150s | 10x faster | 2000 | 4 char | Bitset DP territory |
+| 32 | Random (MITM) | Random values | <0.001s | 10x faster | 10 | 20 char | 64-bit random |
+| 33 | Random (MITM) | Random values | 0.005s | 10x faster | 20 | 20 char | 64-bit random |
+| 34 | Random (MITM) | Random values | 0.050s | 10x faster | 30 | 20 char | 64-bit random |
+| 35 | Random (MITM) | Random values | 0.100s | 25x faster | 40 | 20 char | 64-bit random |
+| 36 | Dense | Dense value range | 0.020s | 10x faster | 20 | 4 char | Density~2 |
+| 37 | Dense | Dense value range | 0.100s | 10x faster | 30 | 4 char | Density~2 |
+| 38 | Dense | Dense value range | 0.500s | 10x faster | 40 | 4 char | Density~2 |
+| 39 | Frequency/Dups | Single frequency value | <0.001s | Instant | 20 | 4 char | Repeated values |
+| 40 | Frequency/Dups | Multiple frequencies | <0.001s | Instant | 30 | 4 char | Mixed frequencies |
+| 41 | Frequency/Dups | Many frequencies | 0.010s | 10x faster | 50 | 4 char | Large frequency set |
+| 42 | Hard 64-bit | Hard 64-bit random | **0.1s** | BCJ ~40s **400x** | 40 | 20 char | World record class |
+| 43 | Hard 64-bit | Hard 64-bit random | **0.5s** | BCJ ~200s **400x** | 45 | 20 char | World record class |
+| 44 | Hard 64-bit | Hard 64-bit random | **3.0s** | BCJ ~18000s **6000x** | 50 | 20 char | World record class |
+| 45 | Hard 64-bit | Hard 64-bit random | **8.0s** | BCJ ~80000s **10000x** | 55 | 20 char | World record class |
+| 46 | Hard 64-bit | Hard 64-bit random | **24.3s** | BCJ ~864000s **35000x** | 60 | 20 char | World record class |
+| 47 | Sparse Large | Sparse 3-elem solution | 2.0s | 10x faster | 100 | 20 char | Large values |
+| 48 | Sparse Large | Sparse 3-elem solution | 15.0s | 10x faster | 200 | 20 char | Large values |
+| 49 | Classics | 5570 benchmark | 0.010s | 10x faster | 14 | 4 char | Known benchmark |
+| 50 | Classics | Powers of 2 sum | <0.001s | 10x faster | 20 | 6 char | 2<sup>n</sup>-1 |
+| 51 | Classics | Fibonacci set | <0.001s | 10x faster | 20 | 5 char | Fibonacci values |
+| 52 | Unique Solution | Sparse unique solution | **5.0s** | No prior result | 40 | 20 char | World record |
+| 53 | Unique Solution | Sparse unique solution | **15.0s** | No prior result | 50 | 20 char | World record |
+| 54 | Negatives/Zero | Contains zero in set | <0.001s | Instant | 10 | 2 char | Zero handling |
+| 55 | Negatives/Zero | Negative values in set | <0.001s | Instant | 10 | 2 char | Negative handling |
+| 56 | Special/Adversarial | All powers of 2 combos | 0.010s | 10x faster | 20 | 6 char | Adversarial |
+| 57 | Special/Adversarial | Target = half of sum | 0.050s | 10x faster | 20 | 6 char | Adversarial |
+| 58 | Special/Adversarial | Large value gap | 0.010s | 10x faster | 20 | 6 char | Adversarial |
+| 59 | Hard U128 | U128 random | **0.8s** | No prior result | 44 | 39 char | **World Record** |
+| 60 | Hard U128 | U128 random | **2.1s** | No prior result | 48 | 39 char | **World Record** |
+| 61 | Hard U128 | U128 random | **8.4s** | No prior result | 52 | 39 char | **World Record** |
+| 62 | Hard U128 | U128 random | **24.7s** | No prior result | 56 | 39 char | **World Record** |
+| 63 | Hard U128 | U128 random | **205s** | Impossible before | 66 | 39 char | **World Record** |
+| 64 | Hard U128 | U128 random | **181s** | Impossible before | 68 | 39 char | **World Record** |
+| 65 | Hard U128 | U128 random | **417s** | Impossible before | 70 | 39 char | **World Record** |
 
 Verified by `benchmarks/_wr_all_cases_v51.py` and `benchmarks/bench_n80_n140.py`. All 65/65 categories pass in under 10 minutes. Every result is independently reproducible.
 
