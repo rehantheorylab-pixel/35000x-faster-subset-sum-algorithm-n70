@@ -27,7 +27,6 @@
 
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
-use std::collections::HashSet;
 use std::sync::Arc;
 use std::thread;
 
@@ -106,7 +105,6 @@ impl SchroeppelShamirEngine {
         let n = p.n;
         let target = p.target_u128();
 
-        // Sort ascending: large elements go into D (CD-side max-heap).
         let mut nums = p.numbers_u128();
         nums.sort_unstable();
 
@@ -120,31 +118,43 @@ impl SchroeppelShamirEngine {
         let qc: Vec<u128> = nums[(qa_sz + qb_sz)..(qa_sz + qb_sz + qc_sz)].to_vec();
         let qd: Vec<u128> = nums[(qa_sz + qb_sz + qc_sz)..].to_vec();
 
-        if sh.stopped() {
-            return;
-        }
-
         let a_sums = build_sums_u128_par(&qa, target);
-        if sh.stopped() {
-            return;
-        }
         let b_sums = build_sums_u128_par(&qb, target);
-        if sh.stopped() {
-            return;
-        }
         let c_sums = build_sums_u128_par(&qc, target);
-        if sh.stopped() {
-            return;
-        }
         let d_sums = build_sums_u128_par(&qd, target);
-        if sh.stopped() {
-            return;
-        }
 
         if a_sums.is_empty() || b_sums.is_empty() || c_sums.is_empty() || d_sums.is_empty() {
             return;
         }
 
+        // Monolithic two-pointer walk (fastest for low-to-mid core counts).
+        let cpu_cores = thread::available_parallelism().map(|n| n.get()).unwrap_or(4);
+        if cpu_cores >= 8 {
+            self.run_u128_partitioned(
+                sh, target, &qa, &qb, &qc, &qd,
+                &a_sums, &b_sums, &c_sums, &d_sums,
+            );
+        } else {
+            self.run_u128_monolithic(
+                sh, target, &qa, &qb, &qc, &qd,
+                &a_sums, &b_sums, &c_sums, &d_sums,
+            );
+        }
+    }
+
+    fn run_u128_monolithic(
+        &self,
+        sh: &Shared,
+        target: u128,
+        qa: &[u128],
+        qb: &[u128],
+        qc: &[u128],
+        qd: &[u128],
+        a_sums: &[(u128, u64)],
+        b_sums: &[(u128, u64)],
+        c_sums: &[(u128, u64)],
+        d_sums: &[(u128, u64)],
+    ) {
         let mut min_heap: BinaryHeap<Reverse<(u128, u32, u32)>> =
             BinaryHeap::with_capacity(b_sums.len());
         for j in 0..b_sums.len() {
@@ -164,7 +174,6 @@ impl SchroeppelShamirEngine {
 
         let mut ops: u64 = 0;
         let mut maybe_match: Option<(u32, u32, u32, u32)> = None;
-        let mut seen: HashSet<u128> = HashSet::with_capacity(1024);
 
         while !min_heap.is_empty() && !max_heap.is_empty() {
             ops += 1;
@@ -189,26 +198,6 @@ impl SchroeppelShamirEngine {
                 }
             };
 
-            // Dedup seen sums locally (no BigUint conversion in hot loop)
-            if !seen.insert(total) {
-                // Already seen — advance both sides.
-                min_heap.pop();
-                max_heap.pop();
-                let ai_us = ai as usize;
-                if ai_us + 1 < a_sums.len() {
-                    let ns = a_sums[ai_us + 1].0.wrapping_add(b_sums[bi as usize].0);
-                    if ns <= target {
-                        min_heap.push(Reverse((ns, (ai_us + 1) as u32, bi)));
-                    }
-                }
-                let ci_us = ci as usize;
-                if ci_us > 0 {
-                    let ns = c_sums[ci_us - 1].0.saturating_add(d_sums[di as usize].0);
-                    max_heap.push((ns, (ci_us - 1) as u32, di));
-                }
-                continue;
-            }
-
             if total == target {
                 maybe_match = Some((ai, bi, ci, di));
                 break;
@@ -216,8 +205,7 @@ impl SchroeppelShamirEngine {
                 min_heap.pop();
                 let ai_us = ai as usize;
                 if ai_us + 1 < a_sums.len() {
-                    let new_sum =
-                        a_sums[ai_us + 1].0.wrapping_add(b_sums[bi as usize].0);
+                    let new_sum = a_sums[ai_us + 1].0.wrapping_add(b_sums[bi as usize].0);
                     if new_sum <= target {
                         min_heap.push(Reverse((new_sum, (ai_us + 1) as u32, bi)));
                     }
@@ -237,12 +225,124 @@ impl SchroeppelShamirEngine {
             let b_mask = b_sums[bi as usize].1;
             let c_mask = c_sums[ci as usize].1;
             let d_mask = d_sums[di as usize].1;
-
             let mut sol: Vec<BigUint> = Vec::new();
-            push_selected(&qa, a_mask, &mut sol);
-            push_selected(&qb, b_mask, &mut sol);
-            push_selected(&qc, c_mask, &mut sol);
-            push_selected(&qd, d_mask, &mut sol);
+            push_selected(qa, a_mask, &mut sol);
+            push_selected(qb, b_mask, &mut sol);
+            push_selected(qc, c_mask, &mut sol);
+            push_selected(qd, d_mask, &mut sol);
+            sh.report(sol, "Schroeppel-Shamir");
+        }
+    }
+
+    fn run_u128_partitioned(
+        &self,
+        sh: &Shared,
+        target: u128,
+        qa: &[u128],
+        qb: &[u128],
+        qc: &[u128],
+        qd: &[u128],
+        a: &[(u128, u64)],
+        b: &[(u128, u64)],
+        c: &[(u128, u64)],
+        d: &[(u128, u64)],
+    ) {
+        let num_threads = thread::available_parallelism().map(|n| n.get()).unwrap_or(8);
+        let result = std::sync::Mutex::new(None::<(u64, u64, u64, u64)>);
+        let stop = std::sync::atomic::AtomicBool::new(false);
+
+        std::thread::scope(|s| {
+            for pid in 0..num_threads {
+                let ntu = num_threads as u128;
+                let ab_low = target * (pid as u128) / ntu;
+                let ab_high = target * ((pid + 1) as u128) / ntu;
+                if ab_low >= ab_high { continue; }
+                let cd_high = target - ab_low;
+                let cd_low = target.saturating_sub(ab_high);
+
+                let result = &result;
+                let stop = &stop;
+                s.spawn(move || {
+                    use std::sync::atomic::Ordering;
+                    let mut min_heap: BinaryHeap<Reverse<(u128, u32, u32)>> =
+                        BinaryHeap::with_capacity(b.len());
+                    for j in 0..b.len() {
+                        let need = ab_low.saturating_sub(b[j].0);
+                        let i = match a.binary_search_by(|e| e.0.cmp(&need)) {
+                            Ok(idx) => idx,
+                            Err(idx) => idx,
+                        };
+                        if i < a.len() {
+                            let sv = a[i].0.wrapping_add(b[j].0);
+                            if sv >= ab_low {
+                                min_heap.push(Reverse((sv, i as u32, j as u32)));
+                            }
+                        }
+                    }
+                    let mut max_heap: BinaryHeap<(u128, u32, u32)> =
+                        BinaryHeap::with_capacity(d.len());
+                    for j in 0..d.len() {
+                        let need = cd_high.saturating_sub(d[j].0);
+                        let i = match c.binary_search_by(|e| e.0.cmp(&need)) {
+                            Ok(idx) => idx,
+                            Err(idx) => { if idx == 0 { continue; } idx - 1 }
+                        };
+                        let sv = c[i].0.wrapping_add(d[j].0);
+                        if sv <= cd_high {
+                            max_heap.push((sv, i as u32, j as u32));
+                        }
+                    }
+                    loop {
+                        if stop.load(Ordering::Relaxed) { return; }
+                        let (ab_v, ai, bi) = match min_heap.peek().copied() {
+                            Some(Reverse(v)) => v, None => return,
+                        };
+                        if ab_v > ab_high || (ai as usize) >= a.len() { return; }
+                        let (cd_v, ci, di) = match max_heap.peek().copied() {
+                            Some(v) => v, None => return,
+                        };
+                        if cd_v < cd_low { return; }
+                        let total = match ab_v.checked_add(cd_v) {
+                            Some(t) => t, None => { max_heap.pop(); continue; }
+                        };
+                        if total == target {
+                            let mut sol = result.lock().unwrap();
+                            if sol.is_none() {
+                                *sol = Some((a[ai as usize].1, b[bi as usize].1, c[ci as usize].1, d[di as usize].1));
+                                stop.store(true, Ordering::Release);
+                            }
+                            return;
+                        } else if total < target {
+                            min_heap.pop();
+                            let us = ai as usize;
+                            if us + 1 < a.len() {
+                                let ns = a[us + 1].0.wrapping_add(b[bi as usize].0);
+                                if ns <= ab_high {
+                                    min_heap.push(Reverse((ns, (us + 1) as u32, bi)));
+                                }
+                            }
+                        } else {
+                            max_heap.pop();
+                            let us = ci as usize;
+                            if us > 0 {
+                                let ns = c[us - 1].0.wrapping_add(d[di as usize].0);
+                                if ns >= cd_low {
+                                    max_heap.push((ns, (us - 1) as u32, di));
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        let solution = { result.lock().unwrap().clone() };
+        if let Some((a_mask, b_mask, c_mask, d_mask)) = solution {
+            let mut sol: Vec<BigUint> = Vec::new();
+            push_selected(qa, a_mask, &mut sol);
+            push_selected(qb, b_mask, &mut sol);
+            push_selected(qc, c_mask, &mut sol);
+            push_selected(qd, d_mask, &mut sol);
             sh.report(sol, "Schroeppel-Shamir");
         }
     }
