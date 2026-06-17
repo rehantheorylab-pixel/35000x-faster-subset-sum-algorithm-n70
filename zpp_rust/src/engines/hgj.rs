@@ -18,7 +18,6 @@
 //! Shamir starts to slow down but bitset DP can't fit the target.
 
 use num_bigint::BigUint;
-use num_traits::ToPrimitive;
 use std::collections::HashMap;
 
 use crate::controller::{Engine, Shared};

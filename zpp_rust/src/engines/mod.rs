@@ -3,6 +3,7 @@ pub mod backward;
 pub mod bcj;
 pub mod bonnetain;
 pub mod hard_u128;
+pub mod tiny_brute;
 pub mod beam;
 pub mod bitset_dp;
 pub mod bridge;
@@ -21,6 +22,19 @@ pub mod pmas;
 pub mod randomized;
 pub mod residue;
 pub mod schroeppel_shamir;
+
+// NEW ENGINE MODULES - World-record additions
+pub mod md_mitm;
+pub mod unified_solver;
+pub mod quantum_grover;
+pub mod distributed_solver;
+
+// WORLD-RECORD ENGINES - Phase 2 additions
+pub mod greedy_plus;
+pub mod split_solver;
+pub mod cascade_filter;
+pub mod turbospec;
+pub mod buint_bridge;
 
 use crate::controller::Engine;
 
@@ -52,6 +66,23 @@ pub fn build(name: &'static str) -> Option<Box<dyn Engine>> {
         "Bonnetain" => Some(Box::new(bonnetain::BonnetainEngine)),
         "Hard-U128" => Some(Box::new(hard_u128::HardU128Engine)),
         "DigitFilter" => Some(Box::new(digit_filter::DigitFilterEngine)),
+        "TinyBrute" => Some(Box::new(tiny_brute::TinyBruteEngine)),
+        "SplitSolver" => Some(Box::new(split_solver::SplitSolver)),
+        "GreedyPlus" => Some(Box::new(greedy_plus::GreedyPlus)),
+
+        // NEW ENGINES - World-record additions
+        "MD-MITM" => Some(Box::new(md_mitm::MdMitmEngine)),
+        "UnifiedSolver" => Some(Box::new(unified_solver::UnifiedSolver)),
+        "QuantumGrover" => Some(Box::new(quantum_grover::QuantumGrover)),
+        "DistributedSolver" => Some(Box::new(distributed_solver::DistributedSolver)),
+
+        // WORLD-RECORD ENGINES - Phase 2 additions
+        "CascadeEngine" => Some(Box::new(cascade_filter::CascadeEngine)),
+        "TurboSpecEngine" => Some(Box::new(turbospec::TurboSpecEngine)),
+        "BigUintBcj" => Some(Box::new(buint_bridge::BigUintBcj)),
+        "BigUintHgj" => Some(Box::new(buint_bridge::BigUintHgj)),
+        "BigUintBonnetain" => Some(Box::new(buint_bridge::BigUintBonnetain)),
+
         _ => None,
     }
 }

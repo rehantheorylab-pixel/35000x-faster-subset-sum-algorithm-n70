@@ -58,7 +58,7 @@ impl Engine for ColumnSatEngine {
         }
 
         let expected_width = cw * (n_vc + n_cc);
-        let mut strs: Vec<String> = p
+        let strs: Vec<String> = p
             .numbers
             .iter()
             .map(|x| {

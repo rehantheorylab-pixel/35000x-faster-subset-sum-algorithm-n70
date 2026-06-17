@@ -16,7 +16,6 @@
 //! single beam search.
 
 use num_bigint::BigUint;
-use num_traits::ToPrimitive;
 use std::collections::HashSet;
 
 use crate::controller::{Engine, Shared};

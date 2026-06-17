@@ -18,7 +18,7 @@
 //!      by descending score.
 
 use num_bigint::BigUint;
-use num_traits::{ToPrimitive, Zero};
+use num_traits::Zero;
 
 use crate::controller::{Engine, Shared};
 

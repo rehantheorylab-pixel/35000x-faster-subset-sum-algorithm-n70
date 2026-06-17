@@ -1,4 +1,5 @@
 //! Cross-run learning: remember which engines win on which problem shapes.
+//! Writes to disk lazily (on Drop) to avoid I/O on every win.
 
 use std::collections::HashMap;
 use std::fs;
@@ -11,21 +12,28 @@ const STORE_NAME: &str = "engine_wins.txt";
 pub struct LearningStore {
     path: PathBuf,
     wins: HashMap<String, HashMap<String, u32>>,
+    dirty: bool,
 }
 
 impl LearningStore {
     pub fn load() -> Self {
         let path = store_path();
-        let wins = fs::read_to_string(&path).map(|s| parse_store(&s)).unwrap_or_default();
-        Self { path, wins }
+        let wins = fs::read_to_string(&path).ok().map(|s| parse_store(&s)).unwrap_or_default();
+        Self { path, wins, dirty: false }
     }
 
     pub fn record_win(&mut self, profile: &Profile, engine: &str) {
         let key = feature_key(profile);
         let entry = self.wins.entry(key).or_default();
         *entry.entry(engine.to_string()).or_insert(0) += 1;
+        self.dirty = true;
+    }
+
+    pub fn flush(&mut self) {
+        if !self.dirty { return; }
         let _ = fs::create_dir_all(self.path.parent().unwrap_or(&self.path));
         let _ = fs::write(&self.path, serialize_store(&self.wins));
+        self.dirty = false;
     }
 
     pub fn bias_order(&self, profile: &Profile, mut names: Vec<&'static str>) -> Vec<&'static str> {
@@ -40,6 +48,27 @@ impl LearningStore {
         });
         names
     }
+
+    /// Return a score boost (0.0–50.0) for each engine based on past wins.
+    /// Used by the scheduler to reorder engines adaptively.
+    pub fn score_boost(&self, profile: &Profile, engine: &str) -> f64 {
+        let key = feature_key(profile);
+        let Some(counts) = self.wins.get(&key) else {
+            return 0.0;
+        };
+        let count = counts.get(engine).copied().unwrap_or(0);
+        if count == 0 {
+            return 0.0;
+        }
+        // Scale: 1 win = +5.0, 5+ wins = +50.0 (enough to jump to top).
+        (count as f64).min(10.0) * 5.0
+    }
+}
+
+impl Drop for LearningStore {
+    fn drop(&mut self) {
+        self.flush();
+    }
 }
 
 fn store_path() -> PathBuf {
@@ -49,50 +78,43 @@ fn store_path() -> PathBuf {
     PathBuf::from(base).join("zpp").join(STORE_NAME)
 }
 
-fn feature_key(p: &Profile) -> String {
-    format!(
-        "n={}|td={}|u128={}|si={}|dens={:.3}",
-        p.n,
-        p.target_digits(),
-        p.u128_safe(),
-        p.is_super_increasing,
-        p.density
-    )
+fn feature_key(profile: &Profile) -> String {
+    format!("n={},bits={},dense={:.2}", profile.n, profile.target.bits(), profile.density)
 }
 
 fn parse_store(s: &str) -> HashMap<String, HashMap<String, u32>> {
-    let mut out: HashMap<String, HashMap<String, u32>> = HashMap::new();
+    let mut map: HashMap<String, HashMap<String, u32>> = HashMap::new();
     for line in s.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
-        let Some((key, rest)) = line.split_once('\t') else {
-            continue;
-        };
-        let mut eng: HashMap<String, u32> = HashMap::new();
-        for part in rest.split(',') {
-            if let Some((name, cnt)) = part.split_once('=') {
-                if let Ok(n) = cnt.parse::<u32>() {
-                    eng.insert(name.to_string(), n);
-                }
+        if let Some(eq) = line.find('=') {
+            let key = line[..eq].trim().to_string();
+            let val = line[eq + 1..].trim();
+            if let Some(pipe) = key.rfind('|') {
+                let feat = key[..pipe].to_string();
+                let ename = key[pipe + 1..].to_string();
+                let count: u32 = val.parse().unwrap_or(0);
+                map.entry(feat).or_default().insert(ename, count);
             }
         }
-        if !eng.is_empty() {
-            out.insert(key.to_string(), eng);
-        }
     }
-    out
+    map
 }
 
 fn serialize_store(wins: &HashMap<String, HashMap<String, u32>>) -> String {
     let mut lines: Vec<String> = Vec::new();
-    for (key, counts) in wins {
-        let parts: Vec<String> = counts
-            .iter()
-            .map(|(e, c)| format!("{e}={c}"))
-            .collect();
-        lines.push(format!("{key}\t{}", parts.join(",")));
+    lines.push("# Z++ LearningStore: feature|engine=count".to_string());
+    let mut pairs: Vec<(String, String, u32)> = Vec::new();
+    for (feat, engs) in wins {
+        for (eng, cnt) in engs {
+            pairs.push((feat.clone(), eng.clone(), *cnt));
+        }
+    }
+    pairs.sort_by(|a, b| b.2.cmp(&a.2));
+    for (feat, eng, cnt) in pairs {
+        lines.push(format!("{}|{}={}", feat, eng, cnt));
     }
     lines.join("\n")
 }

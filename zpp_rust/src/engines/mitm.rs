@@ -1,6 +1,7 @@
 //! Meet-in-the-Middle engine: O(2^(n/2)).
 //! Splits the input in half, enumerates all subset sums of each half,
 //! then hash-joins on (target - left_sum) == right_sum.
+//! Exhaustive: if no match found the problem is truly impossible.
 
 use num_bigint::BigUint;
 use std::collections::HashMap;
@@ -69,22 +70,20 @@ impl Engine for MitmEngine {
                 if !right_sums.contains_key(&ns) {
                     new_pairs.push((ns.clone(), m | (1u64 << bit)));
                 }
-                if ns <= p.target {
-                    let comp = &p.target - &ns;
-                    if let Some(&lm) = left_sums.get(&comp) {
-                        let mut sol: Vec<BigUint> = (0..left.len())
-                            .filter(|&i| lm & (1u64 << i) != 0)
-                            .map(|i| left[i].clone())
-                            .collect();
-                        let rmask = m | (1u64 << bit);
-                        for j in 0..right.len() {
-                            if rmask & (1u64 << j) != 0 {
-                                sol.push(right[j].clone());
-                            }
+                let comp = &p.target - &ns;
+                if let Some(&lm) = left_sums.get(&comp) {
+                    let mut sol: Vec<BigUint> = (0..left.len())
+                        .filter(|&i| lm & (1u64 << i) != 0)
+                        .map(|i| left[i].clone())
+                        .collect();
+                    let rmask = m | (1u64 << bit);
+                    for j in 0..right.len() {
+                        if rmask & (1u64 << j) != 0 {
+                            sol.push(right[j].clone());
                         }
-                        sh.report(sol, "MITM");
-                        return;
                     }
+                    sh.report(sol, "MITM");
+                    return;
                 }
             }
             for (s, m) in new_pairs {
@@ -95,9 +94,6 @@ impl Engine for MitmEngine {
         for (rs, rm) in right_sums.iter() {
             if sh.stopped() {
                 return;
-            }
-            if rs > &p.target {
-                continue;
             }
             let comp = &p.target - rs;
             if let Some(&lm) = left_sums.get(&comp) {
@@ -114,5 +110,8 @@ impl Engine for MitmEngine {
                 return;
             }
         }
+
+        // Exhaustive enumeration — no match means impossible.
+        sh.proved_impossible.store(true, std::sync::atomic::Ordering::Release);
     }
 }

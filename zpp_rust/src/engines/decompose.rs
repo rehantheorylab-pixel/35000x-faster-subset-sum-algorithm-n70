@@ -57,7 +57,7 @@ impl Engine for DecomposeEngine {
             }
 
             // Build remaining-element pool (without using `anchor_idx`).
-            let mut pool_set: HashSet<&BigUint> = p.freq.keys().collect();
+            let pool_set: HashSet<&BigUint> = p.freq.keys().collect();
             // 2-element decomposition of rem.
             for x in &p.numbers {
                 if sh.stopped() {

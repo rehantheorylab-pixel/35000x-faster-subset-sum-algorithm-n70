@@ -14,19 +14,6 @@
 
 use std::time::Duration;
 
-pub struct Timing {
-    pub wall: Duration,
-    pub cpu: Duration,
-}
-
-impl Timing {
-    /// True if the wall-clock duration is below the platform timer
-    /// resolution (we assume ~100 ns conservative bound on Windows).
-    pub fn is_sub_resolution(&self) -> bool {
-        self.wall.as_nanos() == 0
-    }
-}
-
 pub fn fmt_duration(d: Duration) -> String {
     let total_ns = d.as_nanos();
 

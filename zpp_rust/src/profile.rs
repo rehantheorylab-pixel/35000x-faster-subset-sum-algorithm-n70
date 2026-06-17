@@ -134,18 +134,17 @@ fn check_super_increasing(nums: &[BigUint]) -> bool {
 }
 
 fn coefficient_of_variation(nums: &[BigUint]) -> f64 {
-    use num_traits::ToPrimitive;
     if nums.is_empty() {
         return 0.0;
     }
-    let vals: Vec<f64> = nums.iter().filter_map(|x| x.to_f64()).collect();
-    if vals.is_empty() {
-        return 1.0;
-    }
-    let mean = vals.iter().sum::<f64>() / vals.len() as f64;
+    // Use bit-length distribution as a lossless entropy proxy.
+    // For any BigUint, bits() returns the exact number of bits.
+    // CV of bit lengths is well-defined even for 10000-digit numbers.
+    let bitlens: Vec<f64> = nums.iter().map(|x| x.bits() as f64).collect();
+    let mean = bitlens.iter().sum::<f64>() / bitlens.len() as f64;
     if mean.abs() < 1e-12 {
         return 1.0;
     }
-    let var = vals.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / vals.len() as f64;
+    let var = bitlens.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / bitlens.len() as f64;
     var.sqrt() / mean
 }
