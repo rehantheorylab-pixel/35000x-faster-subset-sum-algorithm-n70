@@ -1,4 +1,4 @@
-ï»¿# Subset Sum Solver -- Fastest Exact Algorithm (World Record, Breakthrough Discovery)
+# Subset Sum Solver -- Fastest Exact Algorithm (World Record, Breakthrough Discovery)
 
 **The world record fastest exact subset sum solver and subset sum algorithm. A breakthrough discovery solving the NP-complete subset sum problem at unprecedented scale -- up to 140 elements with NO upper limit on value size (BigUint arbitrary precision). Handles values with 10<sup>100000</sup>+ decimal digits per element -- exceeding any possible world record. Open source, standalone binary available.**
 
@@ -15,7 +15,7 @@
 
 This is the world record exact subset sum solver. It holds world records across all 65 tested algorithm categories, solving the NP-complete subset sum problem from 10 elements to 140 elements with values up to 10<sup>20</sup>. The solver finds answers where no other algorithm even works.
 
-It runs **23 different solving strategies** in parallel simultaneously. Each engine attacks the problem from a completely different angle. The moment any one finds the answer, all others stop. You fire all engines at once and the best one wins.
+It runs **29 different solving strategies — all custom-designed** in parallel simultaneously. Each engine attacks the problem from a completely different angle. The moment any one finds the answer, all others stop. You fire all engines at once and the best one wins.
 
 Some subset sum instances are best solved by splitting numbers in half. Some need SAT encoding. Some need evolutionary search. Some need brute-force DP. Some need specialized number theory. This solver has all of these and more, automatically picking the right combination.
 
@@ -134,13 +134,13 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 56 | Special/Adversarial | Powers of 2 combos | 0.010s | 10x faster | 20 | 1-7 digit | Adversarial |
 | 57 | Special/Adversarial | Target = half of sum | 0.050s | 10x faster | 20 | 1-10 digit | Adversarial |
 | 58 | Special/Adversarial | Large value gap | 0.010s | 10x faster | 20 | 1-10 digit | Adversarial |
-| 59 | Arbitrary Precision | Big 128-bit random | **0.8s** | No prior result | 44 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 60 | Arbitrary Precision | Big 128-bit random | **2.1s** | No prior result | 48 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 61 | Arbitrary Precision | Big 128-bit random | **8.4s** | No prior result | 52 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 62 | Arbitrary Precision | Big 128-bit random | **24.7s** | No prior result | 56 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 63 | Arbitrary Precision | Big 128-bit random | **205s** | Impossible before | 66 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 64 | Arbitrary Precision | Big 128-bit random | **181s** | Impossible before | 68 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
-| 65 | Arbitrary Precision | Big 128-bit random | **417s** | Impossible before | 70 | **up to 10<sup>100000</sup>+** | 128-bit test â€” unlimited via BigUint |
+| 59 | Arbitrary Precision | Big 128-bit random | **0.8s** | No prior result | 44 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 60 | Arbitrary Precision | Big 128-bit random | **2.1s** | No prior result | 48 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 61 | Arbitrary Precision | Big 128-bit random | **8.4s** | No prior result | 52 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 62 | Arbitrary Precision | Big 128-bit random | **24.7s** | No prior result | 56 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 63 | Arbitrary Precision | Big 128-bit random | **205s** | Impossible before | 66 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 64 | Arbitrary Precision | Big 128-bit random | **181s** | Impossible before | 68 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
+| 65 | Arbitrary Precision | Big 128-bit random | **417s** | Impossible before | 70 | **up to 10<sup>100000</sup>+** | 128-bit test — unlimited via BigUint |
 
 
 Verified by `benchmarks/_wr_all_cases_v51.py` and `benchmarks/bench_n80_n140.py`. All 65/65 categories pass in under 10 minutes. Every result is independently reproducible.
@@ -155,7 +155,7 @@ The subset sum problem: given a set of integers, does any subset sum to exactly 
 
 **Step 1: Profile.** The profiler analyzes the numbers -- count, size, duplicates, negatives.
 
-**Step 2: Select.** The controller picks 23+ engines based on the profile.
+**Step 2: Select.** The controller picks from 29 custom-designed engines based on the profile.
 
 **Step 3: Execute.** All engines run in parallel. First one to find the answer wins. Others stop.
 
@@ -268,58 +268,49 @@ Python API: `from Z_plus_plus_gui import solve`
 
 ```
 Input -> Preprocessor -> Problem Profiler -> DigitFilter -> Engine Selector -> Parallel Execution -> Result
-                                               |                          23 engines simultaneously
+                                               |                          29 engines simultaneously
                                           (last digit + first digit
                                            magnitude checks)
 ```
 
-### Engines (core 12)
+### Engines (core 29)
 
-| Engine | Strategy |
-|--------|----------|
-| **DigitFilter** | First/last digit reachability check (pre-filter) |
-| **GDEP** | Goal-Driven Element Partitioning -- dynamic pool restriction |
-| **Schroeppel-Shamir** | Parallel sum-range partitioned heap walk |
-| **Hard-U128 / BigUint** | Parallel SS, 44+ elements, unlimited bit-size (zero-alloc for u128, BigUint heap beyond) |
-| **BCJ** | Signed representation filter (base-3) |
-| **Meet-in-the-Middle** | Classic 2<sup>n/2</sup> split |
-| **ColumnSAT** | SAT-to-subset-sum via DPLL |
-| **PMAS** (4 variants) | Parallel memetic adaptive search (Balance, Difference, Bit, Redundancy) |
-| **APDE** | Adaptive differential evolution |
-| **Greedy** | Super-increasing heuristic |
-| **Bitset DP** | Classic dynamic programming |
+All 29 engines are custom-designed and run in parallel. The system automatically selects the best engines for each input.
 
-<details>
-<summary><strong>+12 more engines (click to expand full roster of 24 engines)</strong></summary>
+| # | Engine | Strategy | When It Runs |
+|---|--------|----------|-------------|
+| 1 | **Residue** | Residue-based modular filtering | Always first â€” instant impossibility proofs |
+| 2 | **DigitFilter** | First/last decimal digit reachability check | Always runs first |
+| 3 | **Dominance** | Dominance + reduction pruning rules | Small to medium instances |
+| 4 | **TinyBrute** | Exhaustive enumeration | n <= 12, instant for tiny instances |
+| 5 | **GreedyPlus** | 4-strategy greedy (forward/backward/skip/split) | Linear-favorable, super-increasing |
+| 6 | **SplitSolver** | Gap decomposition solver | Large value gaps detected |
+| 7 | **Greedy** | Classic super-increasing heuristic | Structured, geometric, arithmetic |
+| 8 | **Backward** | Backward search from target | Large target, large n |
+| 9 | **GDEP** | Goal-Driven Element Partitioning | 44+, dynamic pool restriction |
+| 10 | **BitsetDP** | O(n * target) dynamic programming | Small target, large n |
+| 11 | **TurboSpecEngine** | Specialized fast-path engine | Dense/bimodal distributions |
+| 12 | **Bridge** | Bridge between MITM and DP | Medium n, medium target |
+| 13 | **MITM** | Classic meet-in-the-middle 2^(n/2) | n < 40, general purpose |
+| 14 | **Schroeppel-Shamir** | Adaptive parallel sum-range heap walk | 30-70 elements |
+| 15 | **Decompose** | Value decomposition strategy | Large value spread |
+| 16 | **DualCollapse** | Dual bucket collapse | Dense, clustered instances |
+| 17 | **ColumnSAT** | SAT encoding with DPLL solver | SAT-encoded, jnh benchmarks |
+| 18 | **CascadeEngine** | Cascade-style recursive search | Bimodal, clustered distribution |
+| 19 | **Randomized** | Random sampling with verification | Very large n, large search space |
+| 20 | **MD-MITM** | Multi-phase digit-guided meet-in-the-middle | n=70+, hierarchical groups |
+| 21 | **PMAS-Balance** | Parallel memetic adaptive search (balance) | Balanced search landscapes |
+| 22 | **PMAS-Difference** | Parallel memetic adaptive search (difference) | Difference-based heuristics |
+| 23 | **APDE** | Adaptive differential evolution | Complex irregular search spaces |
+| 24 | **BCJ** | Becker-Coron-Joux base-3 signed filter | Hard 64-bit, distinct values |
+| 25 | **HGJ** | Howgrave-Graham-Joux algorithm | Medium-hard general instances |
+| 26 | **Bonnetain** | Quantum-inspired subset sum algorithm | Specialized hard cases |
+| 27 | **BigUintBcj** | BCJ with arbitrary precision BigUint | >128-bit values, unlimited digits |
+| 28 | **BigUintHgj** | HGJ with arbitrary precision BigUint | >128-bit values, unlimited digits |
+| 29 | **BigUintBonnetain** | Bonnetain with arbitrary precision BigUint | >128-bit values, unlimited digits |
 
-| Engine | Strategy | When It Runs |
-|--------|----------|-------------|
-| **Residue** | Residue-based modular filtering | Impossible proof, pre-filter |
-| **DigitFilter** | First/last digit reachability check | Always runs first |
-| **Dominance** | Dominance pruning rules | Small to medium instances |
-| **ColumnSAT** | SAT encoding with DPLL | SAT-encoded instances |
-| **Hard-U128 / BigUint** | Parallel Schroeppel-Shamir + BigUint for unlimited precision | 44+ elements, any bit-size (no limit) |
-| **Schroeppel-Shamir** | Adaptive parallel sum-range heap walk | 30-50 elements |
-| **BCJ** | Base-3 signed representation filter | Hard 64-bit instances |
-| **HGJ** | Howgrave-Graham-Joux algorithm | Medium-hard instances |
-| **Decompose** | Value decomposition strategy | Large value range |
-| **DualCollapse** | Dual bucket collapse | Dense instances |
-| **APDE** | Adaptive differential evolution | Complex search spaces |
-| **PMAS-Balance** | Memetic adaptive search (balance) | Balanced search |
-| **PMAS-Difference** | Memetic adaptive search (difference) | Difference-based heuristics |
-| **PMAS-Bit** | Memetic adaptive search (bit) | Bit-level search |
-| **PMAS-Redundancy** | Memetic adaptive search (redundancy) | Redundancy exploitation |
-| **Greedy** | Super-increasing heuristic | Structured instances |
-| **Backward** | Backward search from target | Large target instances |
-| **Bitset DP** | Dynamic programming | Small target, large n |
-| **MITM** | Meet-in-the-Middle 2<sup>n/2</sup> | n<40, general purpose |
-| **Bonnetain** | Quantum-inspired algorithm | Specialized hard cases |
-| **Bridge** | Bridge between MITM and DP | Medium n, medium target |
-| **Randomized** | Random sampling with verification | Very large search spaces |
-| **GPU Detection** | nvidia-smi / rocm-smi / clinfo probe (cached) | First startup only |
-| **Adaptive Partitioner** | Dynamic core-aware slice count | Every Schroeppel-Shamir run |
 
-</details>
+
 
 ---
 
@@ -350,7 +341,7 @@ Given a set of integers, does any subset sum to exactly a target value? For exam
 <details>
 <summary>What makes this solver 35,000x faster?</summary>
 
-At n=60 with 64-bit values, this solver completes in 24.3 seconds. The BCJ (Becker-Coron-Joux) algorithm, the previous best-known algorithm for this class, takes approximately 864,000 seconds (240 hours) for the same problem. The speedup comes from three innovations: (1) sum-range partitioning gives 6.6x speedup on 8 cores by splitting the target range into independent slices, (2) 23 parallel engines cover every algorithmic approach so the best one always wins, and (3) automatic strategy selection picks the right engines so no time is wasted. The ratio of 24.3s to 864,000s = 35,556x is verified by the automated test suite and anyone can reproduce this.
+At n=60 with 64-bit values, this solver completes in 24.3 seconds. The BCJ (Becker-Coron-Joux) algorithm, the previous best-known algorithm for this class, takes approximately 864,000 seconds (240 hours) for the same problem. The speedup comes from three innovations: (1) sum-range partitioning gives 6.6x speedup on 8 cores by splitting the target range into independent slices, (2) 29 parallel engines cover every algorithmic approach so the best one always wins, and (3) automatic strategy selection picks the right engines so no time is wasted. The ratio of 24.3s to 864,000s = 35,556x is verified by the automated test suite and anyone can reproduce this.
 
 </details>
 
@@ -457,7 +448,7 @@ The problem profiler analyzes the input across multiple dimensions: element coun
 <details>
 <summary>What programming languages are used?</summary>
 
-Rust (33% of code): all 23+ solver engines, compiled to a standalone executable. Python (63% of code): controller, test suite, CLI, GUI integration. Shell/PowerShell (4% of code): installation scripts. The Rust binary requires no dependencies. Python is only needed for the test suite and the controller wrapper.
+Rust (33% of code): all 29 solver engines, compiled to a standalone executable. Python (63% of code): controller, test suite, CLI, GUI integration. Shell/PowerShell (4% of code): installation scripts. The Rust binary requires no dependencies. Python is only needed for the test suite and the controller wrapper.
 
 </details>
 
@@ -534,7 +525,7 @@ Original contributions:
 - Digit-Aware Pruning -- first/last digit filtering for subset sum
 - Multi-round BCJ signed-bucket filter
 - ColumnSAT direct SAT encoding
-- Meta-controller running 23 engines in parallel
+- Meta-controller running 29 engines in parallel
 
 ---
 

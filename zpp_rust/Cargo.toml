@@ -9,11 +9,12 @@ description = "Z++ Ultimate Engine — Portfolio-based Subset Sum Solver"
 name = "zpp"
 path = "src/main.rs"
 
+[lib]
+name = "zpp"
+path = "src/lib.rs"
+
 [profile.release]
 opt-level = 3
-lto = "fat"
-codegen-units = 1
-panic = "abort"
 strip = true
 
 [profile.release-debuginfo]
@@ -25,5 +26,7 @@ debug = true
 num-bigint = "0.4"
 num-traits = "0.2"
 num-integer = "0.1"
-cpu-time = "1.0"
-dashmap = "6.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+
