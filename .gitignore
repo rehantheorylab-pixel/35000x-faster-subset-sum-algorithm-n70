@@ -20,3 +20,10 @@ __pycache__/
 
 # Keep only essential test scripts
 # (all _wr_*.py, _test_*.py etc. stay as they're part of the benchmark suite)
+
+*.exe
+*.dll
+*.so
+*.dylib
+target/
+__pycache__/

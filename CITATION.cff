@@ -1,20 +1,14 @@
-﻿cff-version: 1.2.0
-title: "35000x Faster Subset Sum Algorithm - World Record Exact Solver"
-message: "If you use this software, please cite it as below."
-type: software
+cff-version: 1.2.0
+message: "If you use this software or reference the Z++ engine algorithms, please cite it as below."
 authors:
-  - given-names: Rehan
-    family-names: Muhammad
-repository-code: "https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70"
+  - family-names: "Muhammad"
+    given-names: "Rehan"
+title: "35000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture"
+version: 1.0.0
+date-released: 2026-06-17
 url: "https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70"
-abstract: "The world's fastest exact subset sum solver. 35,000x faster than previous approaches. 23 parallel engines including GDEP. Holds world records across all 65 test categories. Solves NP-complete subset sum problem up to n=70 elements with values reaching 1 quadrillion."
 keywords:
-  - "subset sum"
-  - "NP-complete"
-  - "exact algorithm"
-  - "combinatorial optimization"
-  - "parallel computing"
-  - "Rust"
-license: MIT
-version: "1.0.0"
-date-released: "2026-05-26"
+  - "subset-sum-problem"
+  - "np-complete"
+  - "combinatorial-optimization"
+  - "high-performance-computing"

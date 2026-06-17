@@ -11,6 +11,12 @@
 
 ---
 
+
+## Direct Citation Notice
+If you are evaluating this solver for academic publications, research portfolios, or optimization benchmarks, please use the automated citation utility on the right sidebar or cite this project as:
+> **Muhammad, R. (2026).** *35000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture.* GitHub Repository.
+
+---
 ## What Is This Subset Sum Solver?
 
 This is the world record exact subset sum solver. It holds world records across all 65 tested algorithm categories, solving the NP-complete subset sum problem from 10 elements to 140 elements with values up to 10<sup>20</sup>. The solver finds answers where no other algorithm even works.
