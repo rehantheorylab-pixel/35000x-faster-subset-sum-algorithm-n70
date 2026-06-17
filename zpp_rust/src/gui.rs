@@ -121,7 +121,10 @@ fn handle_solve(body: &[u8]) -> (&'static str, String) {
     };
 
     if nums.is_empty() {
-        return ("400 Bad Request", r#"{"error":"no numbers"}"#.to_string());
+        if target.is_zero() {
+            return ("200 OK", r#"{"result":"solved","winner":"Preprocessor","solution":"","time_ns":0}"#.to_string());
+        }
+        return ("200 OK", r#"{"result":"impossible","winner":"Preprocessor","time_ns":0}"#.to_string());
     }
 
     let timeout = Duration::from_secs(req.timeout.unwrap_or(300));

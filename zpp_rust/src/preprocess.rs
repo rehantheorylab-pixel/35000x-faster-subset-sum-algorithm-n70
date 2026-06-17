@@ -59,6 +59,9 @@ pub fn reduce(numbers: &[BigUint], target: &BigUint) -> Reduced {
         for x in &nums {
             if &total - x < tgt {
                 // Excluding x makes the sum drop below target → x is forced
+                if *x > tgt {
+                    return Reduced { numbers: nums, target: tgt, forced, impossible: true };
+                }
                 forced.push(x.clone());
                 tgt -= x;
                 changed = true;
