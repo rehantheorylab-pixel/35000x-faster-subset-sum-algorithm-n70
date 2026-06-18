@@ -224,6 +224,11 @@ pub fn schedule(
         scored.push(ScoredEngine::new("GroupDecompose", base2 + 75.0));
     }
 
+    // AdaptiveFunnel: bidirectional bounded MITM for n=20-60
+    if p.n >= 20 && p.n <= 60 && p.u128_safe() {
+        scored.push(ScoredEngine::new("AdaptiveFunnel", base2 + 72.0));
+    }
+
     // ====================================================================
     // Phase 3: BigUint bridge fallback
     // ====================================================================
@@ -303,7 +308,7 @@ pub fn all_engine_names() -> Vec<&'static str> {
         "MD-MITM", "PMAS-Balance", "PMAS-Difference", "APDE",
         "BCJ", "HGJ", "Bonnetain",
         "BigUintBcj", "BigUintHgj", "BigUintBonnetain",
-        "GroupDecompose",
+        "GroupDecompose", "AdaptiveFunnel",
     ]
 }
 

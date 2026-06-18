@@ -32,6 +32,7 @@ pub mod cascade_filter;
 pub mod turbospec;
 pub mod buint_bridge;
 pub mod group_decompose;
+pub mod adaptive_funnel;
 
 use crate::controller::Engine;
 
@@ -74,6 +75,7 @@ pub fn build(name: &'static str) -> Option<Box<dyn Engine>> {
         "BigUintHgj" => Some(Box::new(buint_bridge::BigUintHgj)),
         "BigUintBonnetain" => Some(Box::new(buint_bridge::BigUintBonnetain)),
         "GroupDecompose" => Some(Box::new(group_decompose::GroupDecomposeEngine)),
+        "AdaptiveFunnel" => Some(Box::new(adaptive_funnel::AdaptiveFunnelEngine)),
 
         _ => None,
     }
