@@ -95,10 +95,26 @@ pub struct Outcome {
 pub fn race(profile: Profile, engines: Vec<Box<dyn Engine>>, max_time: Duration) -> Outcome {
     let shared = Arc::new(Shared::new(profile));
     let start = Instant::now();
+    let ncpus = thread::available_parallelism().map(|n| n.get()).unwrap_or(4);
+    let batch_size = (ncpus * 2).min(12);
+
+    // Arc the engines so they can be shared across threads
+    let engines = Arc::new(engines);
     let mut handles = Vec::with_capacity(engines.len());
-    for engine in engines {
-        let sh = Arc::clone(&shared);
-        handles.push(thread::spawn(move || { engine.run(&sh); }));
+
+    // Staggered launch: fast engines (high score) spawn first in small batches.
+    // Heavy engines launch only if fast ones don't solve within 50ms.
+    for batch_start in (0..engines.len()).step_by(batch_size) {
+        if shared.stopped() || start.elapsed() >= max_time {
+            break;
+        }
+        let batch_end = (batch_start + batch_size).min(engines.len());
+        for idx in batch_start..batch_end {
+            let sh = Arc::clone(&shared);
+            let engines = Arc::clone(&engines);
+            handles.push(thread::spawn(move || { engines[idx].run(&sh); }));
+        }
+        thread::sleep(Duration::from_millis(20));
     }
     // Wait on Condvar with timeout instead of busy-polling.
     let mut guard = shared.solution.lock().unwrap();

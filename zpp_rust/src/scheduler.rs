@@ -87,12 +87,18 @@ pub fn schedule(
             scored.push(ScoredEngine::new("Backward", phase_score(1, 80.0)));
         }
         ValDist::Spread => {
-            scored.push(ScoredEngine::new("Decompose", phase_score(1, 99.0)));
-            scored.push(ScoredEngine::new("DualCollapse", phase_score(1, 92.0)));
-            scored.push(ScoredEngine::new("Bridge", phase_score(1, 88.0)));
+            // User-designed engines run FIRST for hard/spread 64-bit
+            scored.push(ScoredEngine::new("GroupDecompose", phase_score(1, 99.0)));
+            scored.push(ScoredEngine::new("AdaptiveFunnel", phase_score(1, 97.0)));
+            scored.push(ScoredEngine::new("GDEP", phase_score(1, 95.0)));
+            scored.push(ScoredEngine::new("Decompose", phase_score(1, 93.0)));
+            scored.push(ScoredEngine::new("DualCollapse", phase_score(1, 88.0)));
+            scored.push(ScoredEngine::new("Bridge", phase_score(1, 86.0)));
             if struct_info.has_gap_split {
-                scored.push(ScoredEngine::new("SplitSolver", phase_score(1, 95.0)));
+                scored.push(ScoredEngine::new("SplitSolver", phase_score(1, 94.0)));
             }
+            // Schroeppel-Shamir as fallback (lower score)
+            scored.push(ScoredEngine::new("Schroeppel-Shamir", phase_score(1, 80.0)));
         }
         ValDist::Bimodal => {
             scored.push(ScoredEngine::new("TurboSpecEngine", phase_score(1, 99.0)));
@@ -159,16 +165,24 @@ pub fn schedule(
             scored.push(ScoredEngine::new("Backward", base2 + 88.0));
         }
         31..=50 => {
-            scored.push(ScoredEngine::new("Backward", base2 + 93.0));
-            scored.push(ScoredEngine::new("Bridge", base2 + 90.0));
-            scored.push(ScoredEngine::new("TurboSpecEngine", base2 + 88.0));
+            // User-designed engines get first crack at 30-50 element range
+            scored.push(ScoredEngine::new("GroupDecompose", base2 + 99.0));
+            scored.push(ScoredEngine::new("AdaptiveFunnel", base2 + 97.0));
+            scored.push(ScoredEngine::new("GDEP", base2 + 95.0));
+            scored.push(ScoredEngine::new("Backward", base2 + 91.0));
+            scored.push(ScoredEngine::new("Bridge", base2 + 88.0));
+            scored.push(ScoredEngine::new("TurboSpecEngine", base2 + 86.0));
             scored.push(ScoredEngine::new("MD-MITM", base2 + 84.0));
             scored.push(ScoredEngine::new("PMAS-Balance", base2 + 80.0));
+            // Schroeppel-Shamir as fallback
+            scored.push(ScoredEngine::new("Schroeppel-Shamir", base2 + 78.0));
         }
         51..=70 => {
-            scored.push(ScoredEngine::new("Backward", base2 + 92.0));
-            scored.push(ScoredEngine::new("Bridge", base2 + 90.0));
-            scored.push(ScoredEngine::new("TurboSpecEngine", base2 + 86.0));
+            scored.push(ScoredEngine::new("GroupDecompose", base2 + 96.0));
+            scored.push(ScoredEngine::new("GDEP", base2 + 94.0));
+            scored.push(ScoredEngine::new("Backward", base2 + 90.0));
+            scored.push(ScoredEngine::new("Bridge", base2 + 88.0));
+            scored.push(ScoredEngine::new("TurboSpecEngine", base2 + 84.0));
             scored.push(ScoredEngine::new("MD-MITM", base2 + 82.0));
             scored.push(ScoredEngine::new("PMAS-Balance", base2 + 78.0));
             scored.push(ScoredEngine::new("APDE", base2 + 74.0));
