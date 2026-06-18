@@ -33,6 +33,7 @@ pub mod turbospec;
 pub mod buint_bridge;
 pub mod group_decompose;
 pub mod adaptive_funnel;
+pub mod micro_decompose;
 
 use crate::controller::Engine;
 
@@ -76,6 +77,7 @@ pub fn build(name: &'static str) -> Option<Box<dyn Engine>> {
         "BigUintBonnetain" => Some(Box::new(buint_bridge::BigUintBonnetain)),
         "GroupDecompose" => Some(Box::new(group_decompose::GroupDecomposeEngine)),
         "AdaptiveFunnel" => Some(Box::new(adaptive_funnel::AdaptiveFunnelEngine)),
+        "MicroDecompose" => Some(Box::new(micro_decompose::MicroDecomposeEngine)),
 
         _ => None,
     }

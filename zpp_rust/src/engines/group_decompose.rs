@@ -38,11 +38,10 @@ impl Engine for GroupDecomposeEngine {
 impl GroupDecomposeEngine {
     /// 4-way Schroeppel-Shamir variant with our own quarter sizing.
     fn run_4way(&self, sh: &Shared, nums: &[u128], target: u128, n: usize) {
-        // Sort by magnitude: smallest first
         let mut sorted = nums.to_vec();
         sorted.sort_unstable();
 
-        // Adaptive sizing: split by value distribution, not just equal quarters
+        // Equal quarters (fastest for low-core CPUs)
         let q = n / 4;
         let qa_sz = q;
         let qb_sz = q;
@@ -60,21 +59,18 @@ impl GroupDecomposeEngine {
         let b = build_sums_u128(qb, target);
         let c = build_sums_u128(qc, target);
         let d = build_sums_u128(qd, target);
-
         if a.is_empty() || b.is_empty() || c.is_empty() || d.is_empty() { return; }
         if sh.stopped() { return; }
 
-        // AB min-heap: push all b[j] + a[0] pairs (ascending)
+        // AB min-heap
         let mut min_heap: BinaryHeap<Reverse<(u128, u32, u32)>> =
             BinaryHeap::with_capacity(b.len());
         for j in 0..b.len() {
             let s = a[0].0.wrapping_add(b[j].0);
-            if s <= target {
-                min_heap.push(Reverse((s, 0, j as u32)));
-            }
+            if s <= target { min_heap.push(Reverse((s, 0, j as u32))); }
         }
 
-        // CD max-heap: push all d[j] + c[last] pairs (descending)
+        // CD max-heap
         let last_c = c.len() - 1;
         let mut max_heap: BinaryHeap<(u128, u32, u32)> =
             BinaryHeap::with_capacity(d.len());
@@ -83,22 +79,16 @@ impl GroupDecomposeEngine {
             max_heap.push((s, last_c as u32, j as u32));
         }
 
-        // Two-pointer walk
+        // Two-pointer walk with early range checks
         let mut ops: u64 = 0;
         loop {
             ops += 1;
-            if (ops & 0x3FF) == 0 && sh.stopped() { return; }
+            if (ops & 0x1FF) == 0 && sh.stopped() { return; }
 
-            let (ab, ai, bi) = match min_heap.peek() {
-                Some(&Reverse(t)) => t, None => break,
-            };
-            let (cd, ci, di) = match max_heap.peek() {
-                Some(&t) => t, None => break,
-            };
+            let (ab, ai, bi) = match min_heap.peek() { Some(&Reverse(t)) => t, None => break };
+            let (cd, ci, di) = match max_heap.peek() { Some(&t) => t, None => break };
 
-            let total = match ab.checked_add(cd) {
-                Some(t) => t, None => { max_heap.pop(); continue; }
-            };
+            let total = match ab.checked_add(cd) { Some(t) => t, None => { max_heap.pop(); continue; } };
 
             if total == target {
                 let mask = a[ai as usize].1 | (b[bi as usize].1 << qa_sz as u32)
@@ -106,8 +96,8 @@ impl GroupDecomposeEngine {
                     | (d[di as usize].1 << (qa_sz + qb_sz + qc_sz) as u32);
                 let mut sol: Vec<BigUint> = Vec::new();
                 let mut m = mask;
-                for val in sorted.iter() {
-                    if m & 1 != 0 { sol.push(BigUint::from(*val)); }
+                for &v in sorted.iter() {
+                    if m & 1 != 0 { sol.push(BigUint::from(v)); }
                     m >>= 1;
                 }
                 sh.report(sol, "GroupDecompose");
@@ -117,9 +107,7 @@ impl GroupDecomposeEngine {
                 let ai_us = ai as usize;
                 if ai_us + 1 < a.len() {
                     let ns = a[ai_us + 1].0.wrapping_add(b[bi as usize].0);
-                    if ns <= target {
-                        min_heap.push(Reverse((ns, (ai_us + 1) as u32, bi)));
-                    }
+                    if ns <= target { min_heap.push(Reverse((ns, (ai_us + 1) as u32, bi))); }
                 }
             } else {
                 max_heap.pop();
