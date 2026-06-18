@@ -31,12 +31,7 @@ impl Engine for GroupDecomposeEngine {
         let nums = p.numbers_u128();
         let n = nums.len();
 
-        // Choose split: 6-group for n>=50, 4-group for n<50
-        if n >= 46 {
-            self.run_6way(sh, &nums, target, n);
-        } else {
-            self.run_4way(sh, &nums, target, n);
-        }
+        self.run_4way(sh, &nums, target, n);
     }
 }
 

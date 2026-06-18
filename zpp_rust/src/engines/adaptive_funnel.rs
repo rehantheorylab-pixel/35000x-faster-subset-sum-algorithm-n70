@@ -1,246 +1,154 @@
-//! AdaptiveFunnel — Bidirectional Double-Ended Pruning Engine
+//! AdaptiveFunnel v2 — u128 on-demand heap with adaptive split
 //!
-//! Core innovation: searches from BOTH directions simultaneously,
-//! applying bounding-box pruning at every step. Forward search builds
-//! sums from smallest elements (0 → target). Backward search builds
-//! from largest elements (total → target). Intersection = solution.
-//!
-//! Key techniques:
-//! 1. Double-ended pruning: prune from top AND bottom on every step
-//! 2. Smart element ordering: most-pruning elements first
-//! 3. Adaptive bounding: dynamic [min, max] window shrinks as we commit
-//! 4. State folding: if two paths reach same (sum, remaining_elements),
-//!    only keep the one with larger sum (greedy for forward) or smaller (backward)
+//! Uses Schroeppel-Shamir's u128 heap technique with adaptive quarter
+//! sizing based on element value distribution analysis.
+//! Key difference from SS: quarter sizes adapt to input patterns.
 
 use num_bigint::BigUint;
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 
 use crate::controller::{Engine, Shared};
 
 pub struct AdaptiveFunnelEngine;
 
 const AF_MIN_N: usize = 20;
-const AF_MAX_N: usize = 40;
+const AF_MAX_N: usize = 70;
 
 impl Engine for AdaptiveFunnelEngine {
-    fn name(&self) -> &'static str {
-        "AdaptiveFunnel"
-    }
+    fn name(&self) -> &'static str { "AdaptiveFunnel" }
 
     fn run(&self, sh: &Shared) {
         let p = &sh.profile;
-        if p.n < AF_MIN_N || p.n > AF_MAX_N || !p.u128_safe() {
-            return;
-        }
+        if p.n < AF_MIN_N || p.n > AF_MAX_N || !p.u128_safe() { return; }
+
         let target = p.target_u128();
-        let nums = p.numbers_u128();
+        let mut nums = p.numbers_u128();
+        nums.sort_unstable();
+
+        // Adaptive quarter sizing: analyze value gaps to find natural splits
         let n = nums.len();
+        let (qa, qb, qc, qd) = adaptive_quarters(&nums, n, target);
 
-        // Phase 0: Sort and analyze
-        let mut sorted = nums.to_vec();
-        sorted.sort_unstable();
+        if sh.stopped() { return; }
 
-        // Compute prefix sums (cumulative from smallest)
-        let mut prefix_sum = vec![0u128; n + 1];
-        for i in 0..n {
-            prefix_sum[i + 1] = prefix_sum[i].wrapping_add(sorted[i]);
+        let a = build_sums_u128(qa, target);
+        let b = build_sums_u128(qb, target);
+        let c = build_sums_u128(qc, target);
+        let d = build_sums_u128(qd, target);
+        if a.is_empty() || b.is_empty() || c.is_empty() || d.is_empty() { return; }
+        if sh.stopped() { return; }
+
+        // SS-style on-demand heap walk
+        let mut min_heap: BinaryHeap<Reverse<(u128, u32, u32)>> =
+            BinaryHeap::with_capacity(b.len());
+        for j in 0..b.len() {
+            let s = a[0].0.wrapping_add(b[j].0);
+            if s <= target { min_heap.push(Reverse((s, 0, j as u32))); }
         }
 
-        let total = prefix_sum[n];
-        if target > total {
-            return; // impossible
+        let last_c = c.len() - 1;
+        let mut max_heap: BinaryHeap<(u128, u32, u32)> =
+            BinaryHeap::with_capacity(d.len());
+        for j in 0..d.len() {
+            let s = c[last_c].0.wrapping_add(d[j].0);
+            max_heap.push((s, last_c as u32, j as u32));
         }
 
-        // Phase 1: Forward search — build reachable sums from smallest elements
-        // We search forward from 0, trying to reach target
-        // At each element: either include or exclude
-        // Prune when: current + max_remaining < target (can't reach target)
-        //        or: current > target (already exceeded)
+        let mut ops: u64 = 0;
+        loop {
+            ops += 1;
+            if (ops & 0x3FF) == 0 && sh.stopped() { return; }
 
-        let forward_sums = build_forward_bounded(&sorted, &prefix_sum, target, sh);
-        if sh.stopped() {
-            return;
-        }
+            let (ab, ai, bi) = match min_heap.peek() { Some(&Reverse(t)) => t, None => break };
+            let (cd, ci, di) = match max_heap.peek() { Some(&t) => t, None => break };
+            let total = match ab.checked_add(cd) { Some(t) => t, None => { max_heap.pop(); continue; } };
 
-        // Phase 2: Backward search — build reachable sums from largest elements
-        // Backward: start from total_sum, try to subtract elements to reach target
-        // Equivalent to: find element subset R such that total - sum(R) = target
-        // i.e., find complement C where sum(C) = total - target
-        let complement = total - target;
-        let backward_sums = if complement == 0 {
-            // Solution is all elements
-            let mut sol: Vec<BigUint> = nums.iter().map(|&x| BigUint::from(x)).collect();
-            sh.report(sol, "AdaptiveFunnel");
-            return;
-        } else if complement < target {
-            // Backward search is cheaper (smaller target)
-            build_backward_bounded(&sorted, &prefix_sum, target, total, sh)
-        } else {
-            // Forward search is cheaper — use complement approach
-            build_complement_bounded(&sorted, &prefix_sum, complement, target, sh)
-        };
-
-        if sh.stopped() {
-            return;
-        }
-
-        // Phase 3: Intersection — find matching sums
-        if let Some(combined_mask) = find_intersection(&forward_sums, &backward_sums, target) {
-            let mut sol: Vec<BigUint> = Vec::new();
-            let mut m = combined_mask;
-            let mut idx = 0;
-            while m != 0 && idx < sorted.len() {
-                if m & 1 != 0 {
-                    sol.push(BigUint::from(sorted[idx]));
+            if total == target {
+                let a_mask = a[ai as usize].1;
+                let b_mask = b[bi as usize].1 << qa.len() as u32;
+                let c_mask = c[ci as usize].1 << (qa.len() + qb.len()) as u32;
+                let d_mask = d[di as usize].1 << (qa.len() + qb.len() + qc.len()) as u32;
+                let mask = a_mask | b_mask | c_mask | d_mask;
+                let mut sol: Vec<BigUint> = Vec::new();
+                let mut m = mask;
+                for &v in nums.iter() {
+                    if m & 1 != 0 { sol.push(BigUint::from(v)); }
+                    m >>= 1;
                 }
-                m >>= 1;
-                idx += 1;
+                sh.report(sol, "AdaptiveFunnel");
+                return;
+            } else if total < target {
+                min_heap.pop();
+                let ai_us = ai as usize;
+                if ai_us + 1 < a.len() {
+                    let ns = a[ai_us + 1].0.wrapping_add(b[bi as usize].0);
+                    if ns <= target { min_heap.push(Reverse((ns, (ai_us + 1) as u32, bi))); }
+                }
+            } else {
+                max_heap.pop();
+                let ci_us = ci as usize;
+                if ci_us > 0 {
+                    let ns = c[ci_us - 1].0.wrapping_add(d[di as usize].0);
+                    max_heap.push((ns, (ci_us - 1) as u32, di));
+                }
             }
-            sh.report(sol, "AdaptiveFunnel");
         }
     }
 }
 
-/// Forward bounded DFS: build reachable sums from smallest elements.
-/// Uses iterative deepening with aggressive bounding.
-/// Returns list of (sum, bitmask_of_included_elements).
-fn build_forward_bounded(
-    elems: &[u128],
-    prefix: &[u128],
-    target: u128,
-    sh: &Shared,
-) -> Vec<(u128, u64)> {
-    let n = elems.len();
-    let half = n / 2; // Only use first half (smallest elements) for forward
-    let total_masks = 1u64 << half;
-
-    // Build all subset sums for the first half
-    let mut sums: Vec<(u128, u64)> = Vec::with_capacity(total_masks as usize);
-
-    // Gray-code fast traversal
-    let mut pref = vec![0u128; half + 1];
-    for i in 0..half {
-        pref[i + 1] = pref[i].wrapping_add(elems[i]);
+/// Adaptive quarter sizing: place elements with large value gaps in separate
+/// quarters to reduce heap enumeration overlap.
+fn adaptive_quarters<'a>(nums: &'a [u128], n: usize, target: u128) -> (&'a [u128], &'a [u128], &'a [u128], &'a [u128]) {
+    // Find the 3 biggest value gaps to use as quarter boundaries
+    if n <= 16 {
+        let q = n / 4;
+        return (&nums[0..q], &nums[q..2*q], &nums[2*q..3*q], &nums[3*q..]);
     }
 
+    // Compute gaps between consecutive elements
+    let mut gaps: Vec<(usize, u128)> = (1..n).map(|i| (i, nums[i] - nums[i-1])).collect();
+    gaps.sort_by(|a, b| b.1.cmp(&a.1));
+
+    // Take the 3 largest gap positions as split points
+    let mut splits: Vec<usize> = gaps.iter().take(3).map(|g| g.0).collect();
+    splits.sort();
+
+    // Ensure minimum quarter size
+    let min_q = (n / 8).max(2);
+    let mut valid: Vec<usize> = Vec::new();
+    for &s in &splits {
+        let prev = valid.last().copied().unwrap_or(0);
+        if s >= prev + min_q && n - s >= min_q { valid.push(s); }
+    }
+
+    // If not enough valid splits, use equal division
+    if valid.len() < 3 {
+        let q = n / 4;
+        return (&nums[0..q], &nums[q..2*q], &nums[2*q..3*q], &nums[3*q..]);
+    }
+
+    let qa = &nums[0..valid[0]];
+    let qb = &nums[valid[0]..valid[1]];
+    let qc = &nums[valid[1]..valid[2]];
+    let qd = &nums[valid[2]..];
+    (qa, qb, qc, qd)
+}
+
+fn build_sums_u128(elems: &[u128], target: u128) -> Vec<(u128, u64)> {
+    let n = elems.len();
+    let total = 1u64 << n;
+    let mut sums = Vec::with_capacity(total as usize);
+    let mut pref = vec![0u128; n + 1];
+    for i in 0..n { pref[i + 1] = pref[i].wrapping_add(elems[i]); }
     let mut s: u128 = 0;
-    for mask in 0u64..total_masks {
-        if sh.stopped() {
-            return Vec::new();
-        }
+    for mask in 0u64..total {
         if mask > 0 {
             let k = mask.trailing_zeros() as usize;
             s = s.wrapping_add(elems[k]).wrapping_sub(pref[k]);
         }
-        // Bounding: only keep sums that could lead to target
-        // After forward half, remaining (large) elements can contribute 0..max_remaining
-        let max_remaining = prefix[n] - prefix[half];
-        if s <= target && s + max_remaining >= target {
-            sums.push((s, mask));
-        }
+        if s <= target { sums.push((s, mask)); }
     }
-
     sums.sort_unstable_by_key(|x| x.0);
     sums
-}
-
-/// Backward: compute all subset sums of the SECOND HALF (larger elements)
-fn build_backward_bounded(
-    elems: &[u128],
-    prefix: &[u128],
-    target: u128,
-    _total: u128,
-    sh: &Shared,
-) -> Vec<(u128, u64)> {
-    let n = elems.len();
-    let half_start = n / 2;
-    let half_n = n - half_start;
-    let total_masks = 1u64 << half_n;
-
-    let mut sums: Vec<(u128, u64)> = Vec::with_capacity(total_masks as usize);
-    let large_elems = &elems[half_start..];
-
-    let mut pref = vec![0u128; half_n + 1];
-    for i in 0..half_n {
-        pref[i + 1] = pref[i].wrapping_add(large_elems[i]);
-    }
-
-    let mut s: u128 = 0;
-    for mask in 0u64..total_masks {
-        if sh.stopped() {
-            return Vec::new();
-        }
-        if mask > 0 {
-            let k = mask.trailing_zeros() as usize;
-            s = s.wrapping_add(large_elems[k]).wrapping_sub(pref[k]);
-        }
-        // Only keep if forward(could reach) + s could == target
-        let max_fwd = prefix[half_start];
-        if s <= target && target - s <= max_fwd {
-            sums.push((s, mask << half_start as u32));
-        }
-    }
-
-    sums.sort_unstable_by_key(|x| x.0);
-    sums
-}
-
-/// Complement approach: find subset that sums to complement, take the complement as solution.
-fn build_complement_bounded(
-    elems: &[u128],
-    prefix: &[u128],
-    complement: u128,
-    target: u128,
-    sh: &Shared,
-) -> Vec<(u128, u64)> {
-    let n = elems.len();
-    let total = prefix[n];
-    let total_masks = 1u64 << n.min(24); // limit to keep manageable
-
-    let mut sums: Vec<(u128, u64)> = Vec::with_capacity(total_masks as usize);
-
-    let limit = n.min(24);
-    let mut pref = vec![0u128; limit + 1];
-    for i in 0..limit {
-        pref[i + 1] = pref[i].wrapping_add(elems[i]);
-    }
-
-    let mut s: u128 = 0;
-    for mask in 0u64..total_masks {
-        if sh.stopped() {
-            return Vec::new();
-        }
-        if mask > 0 {
-            let k = mask.trailing_zeros() as usize;
-            s = s.wrapping_add(elems[k]).wrapping_sub(pref[k]);
-        }
-        if s == complement {
-            // Found complement! The solution is all OTHER elements
-            // This is a single-element result
-            let remaining = total - s;
-            sums.push((remaining, mask));
-        }
-    }
-
-    sums.sort_unstable_by_key(|x| x.0);
-    sums
-}
-
-/// Intersection: find forward_sum + backward_sum == target via binary search
-fn find_intersection(
-    forward: &[(u128, u64)],
-    backward: &[(u128, u64)],
-    target: u128,
-) -> Option<u64> {
-    if forward.is_empty() || backward.is_empty() {
-        return None;
-    }
-    // For each forward_sum fs, we need backward_sum = target - fs
-    for &(fs, fmask) in forward {
-        let need = target - fs;
-        if let Ok(idx) = backward.binary_search_by(|e| e.0.cmp(&need)) {
-            // Found! fmask has small-element bits, backward[idx].1 has large-element bits
-            return Some(fmask | backward[idx].1);
-        }
-    }
-    None
 }
