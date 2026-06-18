@@ -19,6 +19,7 @@ use crate::controller::{Engine, Shared};
 pub struct AdaptiveFunnelEngine;
 
 const AF_MIN_N: usize = 20;
+const AF_MAX_N: usize = 40;
 
 impl Engine for AdaptiveFunnelEngine {
     fn name(&self) -> &'static str {
@@ -27,7 +28,7 @@ impl Engine for AdaptiveFunnelEngine {
 
     fn run(&self, sh: &Shared) {
         let p = &sh.profile;
-        if p.n < AF_MIN_N || !p.u128_safe() {
+        if p.n < AF_MIN_N || p.n > AF_MAX_N || !p.u128_safe() {
             return;
         }
         let target = p.target_u128();
