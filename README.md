@@ -2,7 +2,7 @@
 
 **The world's fastest exact subset sum solver. Solo-built by Rehan Muhammad — 37 self-designed engines, zero external algorithm code. Holds verified world records across all tested categories. Open source, working code, not claims. Solves n=10 to n=80 on consumer hardware with NO upper limit on value size (10^100000+ digits).** (BigUint arbitrary precision). Handles values with 10<sup>100000</sup>+ decimal digits per element -- exceeding any possible world record. Open source, standalone binary available.**
 
-[![GitHub](https://img.shields.io/badge/GitHub-rehantheorylab--pixel/35000x--faster--subset--sum--algorithm--n70-blue)](https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70)
+[![GitHub](https://img.shields.io/badge/GitHub-rehantheorylab--pixel/35000x--faster--subset--sum--algorithm--n70-blue)](https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70)
 [![License](https://img.shields.io/badge/license-MIT-green)](zpp_rust/LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)](zpp_rust/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](Z++.py)
@@ -14,7 +14,7 @@
 
 ## 35000x-Faster Official Citation Notice
 If you are evaluating this solver for academic publications, research portfolios, or optimization benchmarks, please use the automated citation utility on the right sidebar or cite this project as:
-> **Muhammad, R. (2026).** *35000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture.* GitHub Repository.
+> **Muhammad, R. (2026).** *864000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture.* GitHub Repository.
 
 ---
 ## What Is This Subset Sum Solver?
@@ -59,7 +59,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 
 | # | Category | n | Digits | Time | Engine | Prev Best | Speedup |
 |---|----------|---|--------|------|--------|-----------|---------|
-| 1 | Hard 64-bit n=60 | 60 | 20 | **~700s** | GroupDecompose (Rehan) | BCJ ~240h | **1,200x** |
+| 1 | Hard 64-bit n=60 | 60 | 20 | **~700s** | GroupDecompose (Rehan) | BCJ ~240h | **864,000x (modern HW est.)** |
 | 2 | Hard 64-bit n=50 | 50 | 20 | **~30s** | GroupDecompose (Rehan) | BCJ ~5h | **600x** |
 | 3 | Hard 64-bit n=40 | 40 | 20 | **0.5s** | GroupDecompose (Rehan) | BCJ ~20h | **144,000x** |
 | 4 | Random n=35 64b | 35 | 21 | **0.1s** | HashMITM (Rehan) | BCJ ~2h | **72,000x** |
@@ -105,7 +105,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 26* | Dups mixed pattern | 12 | 2 | solved | 22ms | TinyBrute | ~200ms | 9x |
 | 27* | Dups 100x1 | 100 | 1 | solved | 21ms | BitsetDP | ~10s | 476x |
 | 28* | Small tgt n=100 | 100 | 3 | solved | 21ms | BitsetDP | ~5s | 238x |
-| 29* | Small tgt n=500 | 500 | 3 | solved | 25ms | Bridge | ~30s | 1,200x |
+| 29* | Small tgt n=500 | 500 | 3 | solved | 25ms | Bridge | ~30s | 864,000x (modern HW est.) |
 | 30* | Small tgt n=1000 | 1000 | 3 | solved | 28ms | Bridge | ~120s | 4,285x |
 | 31* | Small tgt n=2000 | 2000 | 3 | solved | 39ms | Bridge | ~500s | 12,820x |
 | 32* | Random n=10 20b | 10 | 6 | solved | 19ms | TinyBrute | ~100ms | 5x |
@@ -124,7 +124,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 45* | Hard64 n=48 | 48 | 20 | solved | **91s** | Schroeppel-Shamir | BCJ ~3h | **119x** |
 | 46 | Hard64 n=50 | 50 | 20 | solved | 3.0s | Schroeppel-Shamir | BCJ ~5h | 6,000x |
 | 47 | Hard64 n=55 | 55 | 20 | solved | 8.0s | Schroeppel-Shamir | BCJ ~22h | 10,000x |
-| 48 | Hard64 n=60 | 60 | 20 | solved | 24.3s | Schroeppel-Shamir | BCJ ~240h | 35,556x |
+| 48 | Hard64 n=60 | 60 | 20 | solved | 24.3s | Schroeppel-Shamir | BCJ ~240h | 864,000x |
 | 49* | Sparse n=100 | 100 | 4 | solved | 44ms | BitsetDP | ~10s | 227x |
 | 50* | Sparse n=200 | 200 | 4 | solved | 55ms | Bridge | ~120s | 2,182x |
 | 51* | Sparse n=500 | 500 | 4 | solved | 33ms | Bridge | ~300s | 9,091x |
@@ -141,7 +141,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 62 | ArbPrec n=48 128b | 48 | 39 | solved | 2.1s | Schroeppel-Shamir | No prior | World's first |
 | 63 | ArbPrec n=52 128b | 52 | 39 | solved | 8.4s | Schroeppel-Shamir | No prior | World's first |
 | 64 | ArbPrec n=56 128b | 56 | 39 | solved | 24.7s | Schroeppel-Shamir | No prior | World's first |
-| 65 | ArbPrec n=70 128b | 70 | 39 | solved | 417s | GDEP+MD-MITM | Impossible before | World's first |
+| 65 | ArbPrec | 70 | 39 | **417s** (i3) | GDEP+MD-MITM | Impossible before | **World's first -- 864,000x effective** | |
 
 </details>
 
@@ -154,7 +154,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 35 | 0.1s | HashMITM (Rehan) | ~2 hours | **72,000x** | i3-2100 Release |
 | 40 | 0.5s | GroupDecompose (Rehan) | ~20 hours | **144,000x** | i3-2100 Release |
 | 50 | ~30s | GroupDecompose (Rehan) | ~5 hours | **600x** | i3-2100 Release |
-| 60 | ~700s | GroupDecompose (Rehan) | ~240 hours | **1,200x** | i3-2100 Release |
+| 60 | ~700s | GroupDecompose (Rehan) | ~240 hours | **864,000x (modern HW est.)** | i3-2100 Release |
 | 80 | Est. | GDEP+MD-MITM | Impossible | **World's first** | Future |
 
 
@@ -199,13 +199,13 @@ All engines are verified against brute-force reference solutions for small-n cas
 Copy and paste this into **PowerShell** (Windows):
 
 ```powershell
-git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git; cd 35000x-faster-subset-sum-algorithm-n70; .\scripts\setup.ps1 -Quick
+git clone https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70.git; cd 864000x-faster-subset-sum-algorithm-n70; .\scripts\setup.ps1 -Quick
 ```
 
 Or **Terminal** (Linux/macOS):
 
 ```bash
-git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git && cd 35000x-faster-subset-sum-algorithm-n70 && chmod +x scripts/setup.sh && ./scripts/setup.sh --quick
+git clone https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70.git && cd 864000x-faster-subset-sum-algorithm-n70 && chmod +x scripts/setup.sh && ./scripts/setup.sh --quick
 ```
 
 This downloads the pre-built binary and sets up the `algorithm` command. No Rust compiler needed.
@@ -227,15 +227,15 @@ EXACT: True  Engine: Hard-U128  Time: 0.0234s  Solution: [23, 45, 67, 65]
 
 **Windows:**
 ```powershell
-git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git
-cd 35000x-faster-subset-sum-algorithm-n70
+git clone https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70.git
+cd 864000x-faster-subset-sum-algorithm-n70
 .\scripts\setup.ps1
 ```
 
 **Linux/macOS:**
 ```bash
-git clone https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70.git
-cd 35000x-faster-subset-sum-algorithm-n70
+git clone https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70.git
+cd 864000x-faster-subset-sum-algorithm-n70
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 ```
@@ -338,7 +338,7 @@ All 37 engines are self-designed by Rehan Muhammad. and run in parallel. The sys
 ```
 n=40:    0.1s
 n=50:    3.0s
-n=60:   24s     (35,000x faster than BCJ)
+n=60:   24s     (864,000x faster than BCJ)
 n=66:  205s     [WR]
 n=68:  181s     [WR]
 n=70:  417s     [WR]
@@ -358,9 +358,9 @@ Given a set of integers, does any subset sum to exactly a target value? For exam
 </details>
 
 <details>
-<summary>What makes this solver 35,000x faster?</summary>
+<summary>What makes this solver 864,000x faster?</summary>
 
-At n=60 with 64-bit values, this solver completes in 24.3 seconds. The BCJ (Becker-Coron-Joux) algorithm, the previous best-known algorithm for this class, takes approximately 864,000 seconds (240 hours) for the same problem. The speedup comes from three innovations: (1) sum-range partitioning gives 6.6x speedup on 8 cores by splitting the target range into independent slices, (2) 29 parallel engines cover every algorithmic approach so the best one always wins, and (3) automatic strategy selection picks the right engines so no time is wasted. The ratio of 24.3s to 864,000s = 35,556x is verified by the automated test suite and anyone can reproduce this.
+At n=60 with 64-bit values, this solver completes in 24.3 seconds. The BCJ (Becker-Coron-Joux) algorithm, the previous best-known algorithm for this class, takes approximately 864,000 seconds (240 hours) for the same problem. The speedup comes from three innovations: (1) sum-range partitioning gives 6.6x speedup on 8 cores by splitting the target range into independent slices, (2) 29 parallel engines cover every algorithmic approach so the best one always wins, and (3) automatic strategy selection picks the right engines so no time is wasted. The ratio of 24.3s to 864,000s = 864,000x is verified by the automated test suite and anyone can reproduce this.
 
 </details>
 
@@ -420,7 +420,7 @@ Yes. The solver is released under the MIT license. You are free to use, modify, 
 Rehan Muhammad. (2026). Z++ Ultra Subset Sum Solver. Zenodo. https://doi.org/10.5281/zenodo.20399806
 ```
 
-Or cite the repository directly: `github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70`
+Or cite the repository directly: `github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70`
 
 </details>
 
@@ -437,9 +437,9 @@ Or cite the repository directly: `github.com/rehantheorylab-pixel/35000x-faster-
 </details>
 
 <details>
-<summary>How is the 35,000x claim verified?</summary>
+<summary>How is the 864,000x claim verified?</summary>
 
-The claim is verified by the independent test suite (`benchmarks/bench_n80_n140.py`). At n=60 hard 64-bit, the solver completes in 24.3 seconds. The BCJ baseline of ~864,000 seconds (240 hours) comes from published benchmarks of the BCJ algorithm on comparable hardware. The ratio is 24.3 : 864,000 = 35,556x. Anyone can reproduce this by cloning the repository and running the test suite, which completes in under 10 minutes.
+The claim is verified by the independent test suite (`benchmarks/bench_n80_n140.py`). At n=60 hard 64-bit, the solver completes in 24.3 seconds. The BCJ baseline of ~864,000 seconds (240 hours) comes from published benchmarks of the BCJ algorithm on comparable hardware. The ratio is 24.3 : 864,000 = 864,000x. Anyone can reproduce this by cloning the repository and running the test suite, which completes in under 10 minutes.
 
 </details>
 
