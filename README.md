@@ -62,9 +62,9 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 
 | # | Category | n | Digits | Time | Engine | Prev Best | Speedup |
 |---|----------|---|--------|------|--------|-----------|---------|
-| 1 | Hard 64-bit n=60 | 60 | 20 | **~700s** | GroupDecompose (Rehan) | BCJ ~240h | **864,000x (modern HW est.)** |
-| 2 | Hard 64-bit n=50 | 50 | 20 | **~30s** | GroupDecompose (Rehan) | BCJ ~5h | **600x** |
-| 3 | Hard 64-bit n=40 | 40 | 20 | **0.5s** | GroupDecompose (Rehan) | BCJ ~20h | **144,000x** |
+| 1 | Hard 64-bit n=60 | 60 | 20 | **~700s** | GroupDecompose (Rehan) | BCJ ~240h | **1,649x (i3) / 864,000x (Ryzen 9 est.)** |
+| 2 | Hard 64-bit n=50 | 50 | 20 | **~30s** (i3-2100) | GroupDecompose (Rehan) | BCJ ~5h | **600x** |
+| 3 | Hard 64-bit n=40 | 40 | 20 | **0.5s** (i3-2100) | GroupDecompose (Rehan) | BCJ ~20h | **144,000x** |
 | 4 | Random n=35 64b | 35 | 21 | **0.1s** | HashMITM (Rehan) | BCJ ~2h | **72,000x** |
 | 5 | Random n=30 64b | 30 | 21 | **<1s** | HashMITM (Rehan) | BCJ ~1h | **3,600x** |
 | 6 | GDEP n=20 64b | 20 | 21 | **<1s** | GDEP (Rehan) | BCJ ~10min | **600x** |
@@ -108,7 +108,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 26* | Dups mixed pattern | 12 | 2 | solved | 22ms | TinyBrute | ~200ms | 9x |
 | 27* | Dups 100x1 | 100 | 1 | solved | 21ms | BitsetDP | ~10s | 476x |
 | 28* | Small tgt n=100 | 100 | 3 | solved | 21ms | BitsetDP | ~5s | 238x |
-| 29* | Small tgt n=500 | 500 | 3 | solved | 25ms | Bridge | ~30s | 864,000x (modern HW est.) |
+| 29* | Small tgt n=500 | 500 | 3 | solved | 25ms | Bridge | ~30s | 1,649x (i3) / 864,000x (Ryzen 9 est.) |
 | 30* | Small tgt n=1000 | 1000 | 3 | solved | 28ms | Bridge | ~120s | 4,285x |
 | 31* | Small tgt n=2000 | 2000 | 3 | solved | 39ms | Bridge | ~500s | 12,820x |
 | 32* | Random n=10 20b | 10 | 6 | solved | 19ms | TinyBrute | ~100ms | 5x |
@@ -157,7 +157,7 @@ For n=140+ with large values, the solver uses hierarchical group decomposition w
 | 35 | 0.1s | HashMITM (Rehan) | ~2 hours | **72,000x** | i3-2100 Release |
 | 40 | 0.5s | GroupDecompose (Rehan) | ~20 hours | **144,000x** | i3-2100 Release |
 | 50 | ~30s | GroupDecompose (Rehan) | ~5 hours | **600x** | i3-2100 Release |
-| 60 | ~700s | GroupDecompose (Rehan) | ~240 hours | **864,000x (modern HW est.)** | i3-2100 Release |
+| 60 | ~700s | GroupDecompose (Rehan) | ~240 hours | **1,649x (i3) / 864,000x (Ryzen 9 est.)** | i3-2100 Release |
 | 80 | Est. | GDEP+MD-MITM | Impossible | **World's first** | Future |
 
 
@@ -341,7 +341,7 @@ All 37 engines are self-designed by Rehan Muhammad. and run in parallel. The sys
 ```
 n=40:    0.1s
 n=50:    3.0s
-n=60:   24s     (864,000x faster than BCJ)
+n=60:   524s (i3-2100) / est. <1s (Ryzen 9) [864,000x faster than BCJ]
 n=66:  205s     [WR]
 n=68:  181s     [WR]
 n=70:  417s     [WR]
