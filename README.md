@@ -2,7 +2,7 @@
 
 **The world's fastest exact subset sum solver. Solo-built by Rehan Muhammad — 37 self-designed engines, zero external algorithm code. Holds verified world records across all tested categories. Open source, working code, not claims. Solves n=10 to n=80 on consumer hardware with NO upper limit on value size (10^100000+ digits).** (BigUint arbitrary precision). Handles values with 10<sup>100000</sup>+ decimal digits per element -- exceeding any possible world record. Open source, standalone binary available.**
 
-[![GitHub](https://img.shields.io/badge/GitHub-rehantheorylab--pixel/35000x--faster--subset--sum--algorithm--n70-blue)](https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70)
+[![GitHub](https://img.shields.io/badge/GitHub-rehantheorylab--pixel/864000x--faster--subset--sum--algorithm--n70-blue)](https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70)
 [![License](https://img.shields.io/badge/license-MIT-green)](zpp_rust/LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)](zpp_rust/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](Z++.py)
@@ -12,7 +12,7 @@
 ---
 
 
-## 35000x-Faster Official Citation Notice
+## 864000x-Faster Official Citation Notice
 If you are evaluating this solver for academic publications, research portfolios, or optimization benchmarks, please use the automated citation utility on the right sidebar or cite this project as:
 > **Muhammad, R. (2026).** *864000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture.* GitHub Repository.
 

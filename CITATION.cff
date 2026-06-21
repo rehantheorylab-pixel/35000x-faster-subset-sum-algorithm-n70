@@ -3,12 +3,12 @@ message: "If you use this software or reference the Z++ engine algorithms, pleas
 authors:
   - family-names: "Muhammad"
     given-names: "Rehan"
-title: "35000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture"
+title: "864000x-faster-subset-sum-algorithm-n70: The Z++ Exact Multi-Engine Solver Architecture"
 version: 1.0.0
 date-released: 2026-06-17
-url: "https://github.com/rehantheorylab-pixel/35000x-faster-subset-sum-algorithm-n70"
+url: "https://github.com/rehantheorylab-pixel/864000x-faster-subset-sum-algorithm-n70"
 keywords:
-  - "35000x-faster"
+  - "864000x-faster"
   - "subset-sum-problem"
   - "np-complete"
   - "combinatorial-optimization"
